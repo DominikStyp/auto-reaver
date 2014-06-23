@@ -1,0 +1,13 @@
+#!/bin/bash
+PIN_DATE_TMP_DIR=$(pwd)"/ReaverLastPinDates";
+if [[ -z "$1" ]]; then
+  echo "Using $0 [BSSID]";
+  exit;
+fi
+
+F=$PIN_DATE_TMP_DIR"/"$(echo "$1" | sed s/://g);
+if [[ ! -f "$F" ]]; then
+   echo "File $F doesn't exist";
+fi
+
+cat $F | gawk '{ print strftime("%c",$0); }';

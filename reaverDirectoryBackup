@@ -1,0 +1,14 @@
+#!/bin/bash
+DIR=/usr/local/etc/reaver/
+BACKUPDIR=$(pwd)/reaverBackup
+if [ ! -d $BACKUPDIR ]; then
+  mkdir -p -m 700 "$BACKUPDIR"
+fi
+FILENAME=reaverBackup_`date +"%Y-%m-%d_%H-%M-%S"`.tar.gz
+FILEPATH="$BACKUPDIR"/"$FILENAME"
+tar -czvf $FILEPATH $DIR
+
+# List contents of tar.gz file
+# tar -ztvf file.tar.gz
+echo ">>> Listing contents of created backup $FILEPATH : "
+tar -ztvf $FILEPATH
