@@ -69,15 +69,12 @@
 #    sudo iwlist wlan0 scan
 #    wash -i mon0 -C -s
 
-
 if [[ ! -f $(pwd)"/configurationSettings" ]]; then
-    echo "OOOPS!!! You don't have ./configurationSettings file here!";
-    echo "I can't start without it";
+    echo "OOOOOPS! You've lost configuration file of AutoReaver: ./configurationSettings";
+    echo "Try to recover this file, or download default version from project site, and try again";
     exit;
 fi
-
 source $(pwd)"/configurationSettings";
-
 
 
 if [[ -z "$1" ]]; then
@@ -310,7 +307,7 @@ if [[ $[$INACTIVITY_TIMEOUT] > 0 ]]; then
     makeActivityChecker;  
 fi
 
-# !IMPORTANT!! Changing file separator to \n gives us ability 
+# !IMPORTANT!! Changing Internat Field Separator to \n gives us ability 
 # to loop over file using new lines instead of words
 IFS=$'\n';
 
