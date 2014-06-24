@@ -415,11 +415,11 @@ while true; do
 
 	  # check activity if performed by touching temporary file
 	  if(/'$REAVER_ACTIVITY_PERL_REGEXP'/){
-	      open AFILE, ">'$CHECK_ACTIVITY_FILE'"; close AFILE;
+	      system("touch '$CHECK_ACTIVITY_FILE'");
 	  }
 	  # check rate limiting
 	  elsif(/AP rate limiting/){
-	      open BFILE, ">'$BSSID_LIMIT_FILE'"; close BFILE;
+	      system("touch '$BSSID_LIMIT_FILE'");
 	      # sending -INT signal acts like CTRL + C shortcut
 	      system("killall -INT reaver"); 
 	      print $_,"\n[+] Session saved"; 
