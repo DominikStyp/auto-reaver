@@ -121,6 +121,14 @@ fi
 if [[ ! -d "$PIN_DATE_TMP_DIR" ]]; then
     mkdir -p -m 700 $PIN_DATE_TMP_DIR;
 fi
+if [[ ! -f "$CRACKED_LIST_FILE_PATH" ]]; then
+    echo "" >> $CRACKED_LIST_FILE_PATH;
+    if [[ ! -f "$CRACKED_LIST_FILE_PATH" ]]; then
+	echo "Couldn't create file: $CRACKED_LIST_FILE_PATH";
+	echo "Check if script has writing permissions";
+	exit;
+    fi
+fi
 if [[ ! -d "$REAVER_SESSION_DIR" ]]; then
     echoBlue "Reaver session directory is not detected";
     echoBlue "$REAVER_SESSION_DIR is not a directory";
@@ -267,16 +275,21 @@ isAPOnline(){
   local BSSID=$1;
   local CHANNEL=$2;
   local TMP_LOG="$TMP_DIR/isAPOnline";
+  local AIRODUMP_CSV_LOG=$TMP_LOG"-01.csv";
   local BEGIN_TIME=$(date +%s);
-  nohup airodump-ng --bssid=$BSSID --channel=$CHANNEL mon0 &> $TMP_LOG &
+  # clear old logs
+  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+  nohup airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &> /dev/null &
   local LAST_PID=$!;
   while true; do
-      local CHECK=$(cat $TMP_LOG | grep "$BSSID");
+      # re-check airodump-ng log after X seconds
+      sleep 3;
+      local CHECK=$(cat $AIRODUMP_CSV_LOG | grep "$BSSID");
       # if CHECK isn't empty it means that we have BSSID in airodump-ng log
       # so AP is online
       if [[ -n "$CHECK" ]]; then
 	  kill $LAST_PID;
-	  echo "" > $TMP_LOG;
+	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo 1;
 	  return;
       fi
@@ -284,12 +297,10 @@ isAPOnline(){
       # so AP is offline
       if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
-	  echo "" > $TMP_LOG;
+	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo 0;
 	  return;
       fi
-      # re-check airodump-ng log after X seconds
-      sleep 5;
   done
 }
 ########### END OF FUNCTIONS #######################################################
@@ -432,9 +443,9 @@ while true; do
 	      print FILE $_;
 	      close FILE;
 	      # remove AP from your list by prepend with comment symbol "#"
-	      system("cat '$FILEPATH' | sed \"s/'$BSSID'/#----KEY-WAS-FOUND--- '$BSSID'/\" >> '$TMP_DIR'/tmpTargetsFile");
+	      system("cat '$FILEPATH' | sed \"s/'$BSSID'/#----PIN-WAS-FOUND--- '$BSSID'/\" >> '$TMP_DIR'/tmpTargetsFile");
 	      system("mv -f '$TMP_DIR'/tmpTargetsFile '$FILEPATH'");
-	      print "\nKEY WAS FOUND!!!";
+	      print "\nKPIN WAS FOUND!!!";
 	      print "\nI`ve logged data to file '$CRACKED_LIST_FILE_PATH'\n";
 	  }
 	  elsif (/WPA PSK:/){
