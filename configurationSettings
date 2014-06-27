@@ -13,7 +13,7 @@
 # E = Terminate each WPS session with an EAP FAIL packet (for poor AP implementations)
 # vv is Enabled by default below, because script relies on Reaver response
 # WARNING! You can't turn off -v or -vv flag, because script is analyzing Reaver output
-ADDITIONAL_OPTIONS="g 1 -E -S -N -T 1 -t 15 -d 0 -x 3";
+ADDITIONAL_OPTIONS="-E -S -N -T 1 -t 15 -d 0 -x 3";
 # Delay in seconds between association requests (aireplay-ng fake auth -l option)
 FAKE_AUTH_DELAY_SECONDS=60;
 # sleep in seconds between checking different AP's (inner loop iteration)
