@@ -437,7 +437,7 @@ while true; do
 	      exit 1; 
 	  }
 	  # check if PIN or PSK was discovered
-	  elsif (/WPS PIN:/){  
+	  elsif (/WPS PIN/){  
 	      open FILE, ">>'$CRACKED_LIST_FILE_PATH'"; 
 	      print FILE "-----PIN----'$BSSID' ('$ESSID')-----------";
 	      print FILE $_;
@@ -445,10 +445,10 @@ while true; do
 	      # remove AP from your list by prepend with comment symbol "#"
 	      system("cat '$FILEPATH' | sed \"s/'$BSSID'/#----PIN-WAS-FOUND--- '$BSSID'/\" >> '$TMP_DIR'/tmpTargetsFile");
 	      system("mv -f '$TMP_DIR'/tmpTargetsFile '$FILEPATH'");
-	      print "\nKPIN WAS FOUND!!!";
+	      print "\nPIN WAS FOUND!!!";
 	      print "\nI`ve logged data to file '$CRACKED_LIST_FILE_PATH'\n";
 	  }
-	  elsif (/WPA PSK:/){
+	  elsif (/WPA PSK/){
 	      open FILE, ">>'$CRACKED_LIST_FILE_PATH'"; 
 	      print FILE "-----PASSPHRASE----'$BSSID' ('$ESSID')-----------";
 	      print FILE $_;

@@ -1,13 +1,17 @@
 #!/bin/bash
-PIN_DATE_TMP_DIR=$(pwd)"/ReaverLastPinDates";
+source $(pwd)"/configurationSettings";
+if [[ ! -d "$PIN_DATE_TMP_DIR" ]]; then
+  echo "Your PIN_DATE_TMP_DIR doesn't exist";
+  echo "See ./configurationSettings file";
+  exit;
+fi
 if [[ -z "$1" ]]; then
   echo "Using $0 [BSSID]";
   exit;
 fi
-
 F=$PIN_DATE_TMP_DIR"/"$(echo "$1" | sed s/://g);
 if [[ ! -f "$F" ]]; then
    echo "File $F doesn't exist";
 fi
 
-cat $F | gawk '{ print strftime("%c",$0); }';
+cat $F | gawk '{ print strftime("%Y-%m-%d %H:%m:%S",$0); }';
