@@ -2,18 +2,18 @@
 
 ############ AUTO-REAVER CONFIGURATION #######################################
 #### Additional Reaver options besides bssid, spoofed mac, session file, channel
-# d = delay (seconds) between PIN attempts
+# d [seconds] = delay (seconds) between PIN attempts
 # g = Quit after num pin attempts (for 1 iteration of loop)
-# T = Set the M5/M7 timeout period [0.20]
+# T [seconds] = Set the M5/M7 timeout period [0.20]
 # t = receive timeout
 # l = lockdown delay (if WPS is blocked)
 # N = do not send NACK's if packets are out of order
 # S = Use small DH keys to improve crack speed
-# x = Fail wait in seconds (When 10 consecutive unexpected WPS errors are encountered)
+# x [seconds] = Fail wait in seconds (When 10 consecutive unexpected WPS errors are encountered)
 # E = Terminate each WPS session with an EAP FAIL packet (for poor AP implementations)
 # vv is Enabled by default below, because script relies on Reaver response
 # WARNING! You can't turn off -v or -vv flag, because script is analyzing Reaver output
-ADDITIONAL_OPTIONS="-E -S -N -T 1 -t 15 -d 0 -x 3";
+ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 15 -d 0 -x 3";
 # Delay in seconds between association requests (aireplay-ng fake auth -l option)
 FAKE_AUTH_DELAY_SECONDS=60;
 # sleep in seconds between checking different AP's (inner loop iteration)

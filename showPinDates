@@ -14,4 +14,4 @@ if [[ ! -f "$F" ]]; then
    echo "File $F doesn't exist";
 fi
 
-cat $F | gawk '{ print strftime("%Y-%m-%d %H:%m:%S",$0); }';
+cat $F | gawk '{ print strftime("%Y-%m-%d %H:%M:%S",$0); }';
