@@ -370,7 +370,7 @@ while true; do
       # include specific AP settings if file exists
       if [[ -f "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR" ]]; then
 	  source "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
-	  echoBlue "I've included specific settings for $ESSID from file "$(pwd)"configurationSettingsPerAp/$BSSID_CLEAR";
+	  echoBlue "I've included specific settings for $ESSID from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
       # but we have to include default configurationSettings again for another APs
       # to prevent overwriting of default setting by one AP to all APs
       else 
