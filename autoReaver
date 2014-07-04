@@ -336,18 +336,11 @@ while true; do
   # get targets (list of pairs BSSID CHANNEL from file), below near done is file
   echoBlue "Start reading file: $FILEPATH";
   FILE=$(cat $FILEPATH);
-  # here we generate random mac address (containing only numbers 0-9)
-  # first octets should be 02 as most Wireless Cards have
-  if [[ -z "$SPOOFED_MAC" ]]; then
-    MAC=$(perl -e 'sub l{":".int(rand(9)).int(rand(9));}; print "02".l.l.l.l.l;');
-  else
-    MAC=$SPOOFED_MAC;
-  fi
+
  
-  echoBlue "Spoofed MAC: $MAC";
   resetWifiCard;
   restartMonitor;
-  changeMacTo $MAC;
+  #changeMacTo $MAC;
  
   for TARGET in $FILE; do
       echoBlue "--------------------------------------------------";
@@ -366,15 +359,25 @@ while true; do
 	  echoBlue "Error one of variables.. BSSID=$BSSID, CHANNEL=$CHANNEL is empty";
 	  continue;
       fi
-
       # include specific AP settings if file exists
       if [[ -f "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR" ]]; then
+          echoBlue "I've included specific settings for '$ESSID' from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
 	  source "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
-	  echoBlue "I've included specific settings for $ESSID from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
       # but we have to include default configurationSettings again for another APs
       # to prevent overwriting of default setting by one AP to all APs
       else 
 	  source "$(pwd)/configurationSettings";
+      fi
+      # here we generate random mac address (containing only numbers 0-9)
+      # first octets should be 02 as most Wireless Cards have
+      if [[ -z "$SPOOFED_MAC" ]]; then
+	      MAC=$(perl -e 'sub l{":".int(rand(9)).int(rand(9));}; print "02".l.l.l.l.l;');
+	      changeMacTo $MAC;
+      fi
+      # check if mac was changed - if so - proceed with macchanger
+      if [ ! -z "$SPOOFED_MAC" ] && [ "$MAC" != "$SPOOFED_MAC" ]; then
+	      MAC=$SPOOFED_MAC;
+	      changeMacTo $SPOOFED_MAC;
       fi
       # sleep between APs
       if [[ $[$SLEEP_BETWEEN_APS] > 0 ]]; then
