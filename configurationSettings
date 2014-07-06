@@ -13,7 +13,7 @@
 # E = Terminate each WPS session with an EAP FAIL packet (for poor AP implementations)
 # vv is Enabled by default below, because script relies on Reaver response
 # WARNING! You can't turn off -v or -vv flag, because script is analyzing Reaver output
-ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 15 -d 0 -x 3";
+ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 -x 3";
 # Delay in seconds between association requests (aireplay-ng fake auth -l option)
 FAKE_AUTH_DELAY_SECONDS=300;
 # sleep in seconds between checking different AP's (inner loop iteration)
@@ -24,7 +24,7 @@ SLEEP_BETWEEN_APS=5;
 SLEEP_BEFORE_LIST_RECHECK=600;
 # Time in minutes during which AP is skipped inside loop because of reach "AP rate limit"
 # Notice: "...was blocked less than {LIMIT_WAIT_MINUTES} minutes ago, skipping"
-LIMIT_WAIT_MINUTES=30;
+LIMIT_WAIT_MINUTES=15;
 # Timeout in seconds during script waits for AP to show up in airodump, after that AP is considered offline
 # Notice: "Wait {BSSID_ONLINE_TIMEOUT} seconds... scanning if XX:XX:XX:XX:XX:XX (XXXX) is online" 
 BSSID_ONLINE_TIMEOUT=30;
