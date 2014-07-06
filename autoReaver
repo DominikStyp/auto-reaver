@@ -322,7 +322,7 @@ findAPChannel(){
   while true; do
       # re-check airodump-ng log after X seconds
       sleep 3;
-      local CHANNEL=$(cat $AIRODUMP_CSV_LOG | awk -F', ' '{ if(/'$BSSID'/){ print $4;} }');
+      local CHANNEL=$(cat $AIRODUMP_CSV_LOG | gawk -F', ' '{ if(/'$BSSID'/){ print gensub(/ +/,"","g", $4); } }');
       # if channel was found
       if [[ -n "$CHANNEL" ]]; then
 	  kill $LAST_PID;
