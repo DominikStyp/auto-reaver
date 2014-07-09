@@ -18,10 +18,10 @@ ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 -x 3";
 FAKE_AUTH_DELAY_SECONDS=300;
 # sleep in seconds between checking different AP's (inner loop iteration)
 # Notice: "Sleeping between AP's for {SLEEP_BETWEEN_APS}"
-SLEEP_BETWEEN_APS=5;
+SLEEP_BETWEEN_APS=0;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=600;
+SLEEP_BEFORE_LIST_RECHECK=60;
 # Time in minutes during which AP is skipped inside loop because of reach "AP rate limit"
 # Notice: "...was blocked less than {LIMIT_WAIT_MINUTES} minutes ago, skipping"
 LIMIT_WAIT_MINUTES=15;
@@ -71,7 +71,7 @@ WIRELESS_INTERFACE="wlan0";
 # which means that only rejecting PIN will be considered as activity.
 # Sometimes Reaver outputs only "Received M1" and won't go further, then you should change this to "Received M3". 
 # This value should depend on specific AP's behavior.
-REAVER_ACTIVITY_PERL_REGEXP="Received M\d+";
+REAVER_ACTIVITY_PERL_REGEXP="Received M3";
 
 
 ######################## END OF CONFIGURATION #######################################################
