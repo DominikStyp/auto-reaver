@@ -14,6 +14,11 @@
 # vv is Enabled by default below, because script relies on Reaver response
 # WARNING! You can't turn off -v or -vv flag, because script is analyzing Reaver output
 ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 -x 3";
+# since (2014-07-10)
+# minimum number of minutes between pin attempts per access point
+# this option ensures you that AP won't be checked often than MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes
+# so if AP blocks WPS often consider to use this option
+MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=500;
 # Delay in seconds between association requests (aireplay-ng fake auth -l option)
 FAKE_AUTH_DELAY_SECONDS=300;
 # sleep in seconds between checking different AP's (inner loop iteration)

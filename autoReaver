@@ -325,17 +325,21 @@ findAPChannel(){
       local CHANNEL=$(cat $AIRODUMP_CSV_LOG | gawk -F', ' '{ if(/'$BSSID'/){ print gensub(/ +/,"","g", $4); } }');
       # if channel was found
       if [[ -n "$CHANNEL" ]]; then
+          # bad channel.... check again
+          if [[ $CHANNEL -gt 14 ]]; then
+	      continue;
+          fi
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo $CHANNEL;
-	  return $CHANNEL;
+	  return;
       fi
       # if we reached timeout we have to end with failure
       if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] -lt $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo 0;
-	  return 0;
+	  return;
       fi
   done
 }
@@ -429,6 +433,14 @@ while true; do
       # if so.. than BSSID is skipped 
       if [[ ! -z $(find ${LIMIT_TMP_DIR}/ -type f -name ${BSSID_CLEAR} -mmin -${LIMIT_WAIT_MINUTES}) ]]; then
 	  echoBlue "$BSSID ($ESSID) was blocked less than $LIMIT_WAIT_MINUTES minutes ago, skipping";
+	  continue;
+      fi
+      
+      ######### CHECK IF {MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS} PASSED SINCE LAST PIN CHECK #######
+      # if file indicating AP rate limit exists, and if it was modified less than LIMIT_WAIT_MINUTES minutes
+      # if so.. than BSSID is skipped 
+      if [[ ! -z $(find ${REAVER_SESSION_DIR}/ -type f -name ${BSSID_CLEAR} -mmin -${MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS}) ]]; then
+	  echoBlue "$BSSID ($ESSID) was checked less than $MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes ago, skipping";
 	  continue;
       fi
 
