@@ -439,7 +439,7 @@ while true; do
       ######### CHECK IF {MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS} PASSED SINCE LAST PIN CHECK #######
       # if file indicating AP rate limit exists, and if it was modified less than LIMIT_WAIT_MINUTES minutes
       # if so.. than BSSID is skipped 
-      if [[ ! -z $(find ${REAVER_SESSION_DIR}/ -type f -name ${BSSID_CLEAR} -mmin -${MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS}) ]]; then
+      if [[ ! -z $(find ${REAVER_SESSION_DIR}/ -type f -name "${BSSID_CLEAR}.wpc" -mmin -${MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS}) ]]; then
 	  echoBlue "$BSSID ($ESSID) was checked less than $MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes ago, skipping";
 	  continue;
       fi
