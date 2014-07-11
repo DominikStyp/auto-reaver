@@ -282,10 +282,13 @@ isAPOnline(){
   rm $AIRODUMP_CSV_LOG 2>/dev/null;
   airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &> /dev/null &
   local LAST_PID=$!;
-  while true; do
+  local CHECK="";
+  while true; do  
       # re-check airodump-ng log after X seconds
       sleep 3;
-      local CHECK=$(cat $AIRODUMP_CSV_LOG | grep "$BSSID");
+      if [[ -f "$AIRODUMP_CSV_LOG" ]];then
+	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep "$BSSID");
+      fi
       # if CHECK isn't empty it means that we have BSSID in airodump-ng log
       # so AP is online
       if [[ -n "$CHECK" ]]; then
@@ -319,10 +322,13 @@ findAPChannel(){
   rm $AIRODUMP_CSV_LOG 2>/dev/null;
   nohup airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0 &> /dev/null &
   local LAST_PID=$!;
+  local CHECK="";
   while true; do
       # re-check airodump-ng log after X seconds
       sleep 3;
-      local CHANNEL=$(cat $AIRODUMP_CSV_LOG | gawk -F', ' '{ if(/'$BSSID'/){ print gensub(/ +/,"","g", $4); } }');
+      if [[ -f "$AIRODUMP_CSV_LOG" ]];then
+	 CHANNEL=$(cat $AIRODUMP_CSV_LOG | gawk -F', ' '{ if(/'$BSSID'/){ print gensub(/ +/,"","g", $4); } }');
+      fi
       # if channel was found
       if [[ -n "$CHANNEL" ]]; then
           # bad channel.... check again
