@@ -180,7 +180,7 @@ while true; do
     NOW=\$(date +%s);
     CURRENT_INACTIVITY=\$[\$NOW-\$LASTMOD];
     echo \$(date)": Reaver inactivity...\$CURRENT_INACTIVITY/\$TIMEOUT seconds";
-    if [[ \$[\$NOW] -gt \$[\$LASTMOD+\$TIMEOUT] ]]; then
+    if [[ \$[\$NOW] > \$[\$LASTMOD+\$TIMEOUT] ]]; then
 	killall -INT reaver;
 	echo "Reaver killed...";
     fi
@@ -286,7 +286,7 @@ isAPOnline(){
   while true; do  
       # if we reached timeout we have to end with failure
       # so AP is offline
-      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] -lt $[$(date +%s)] ]]; then
+      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo "0";
@@ -303,7 +303,6 @@ isAPOnline(){
       # so AP is online
       if [[ -n "$CHECK" ]]; then
 	  kill $LAST_PID;
-	  cat $AIRODUMP_CSV_LOG;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo "1";
 	  return;
@@ -329,7 +328,7 @@ findAPChannel(){
   local CHANNEL="";
   while true; do
       # if we reached timeout we have to end with failure
-      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] -lt $[$(date +%s)] ]]; then
+      if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
 	  echo "0";
@@ -362,7 +361,7 @@ if [[ $(whoami) != 'root' ]]; then
    exit;
 fi
 
-if [[ $[$INACTIVITY_TIMEOUT] -gt 0 ]]; then
+if [[ $[$INACTIVITY_TIMEOUT] > 0 ]]; then
     makeActivityChecker;  
 fi
 
@@ -433,7 +432,7 @@ while true; do
       fi
 
       ########## SLEEP BETWEEN APS ###############
-      if [[ $[$SLEEP_BETWEEN_APS] -gt 0 ]]; then
+      if [[ $[$SLEEP_BETWEEN_APS] > 0 ]]; then
 	echoBlue "Sleeping between AP's for $SLEEP_BETWEEN_APS seconds....";
 	sleep $SLEEP_BETWEEN_APS;
       fi
@@ -560,7 +559,7 @@ while true; do
     done
 
     ########## SLEEP AFTER LIST RECHECK #################
-    if [[ $[$SLEEP_BEFORE_LIST_RECHECK] -gt 0 ]]; then
+    if [[ $[$SLEEP_BEFORE_LIST_RECHECK] > 0 ]]; then
       echoBlue "Sleeping before another list re-check for $SLEEP_BEFORE_LIST_RECHECK seconds....";
       echoBlue ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>";
       sleep $SLEEP_BEFORE_LIST_RECHECK;
