@@ -19,6 +19,13 @@ ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 -x 3";
 # this option ensures you that AP won't be checked more often than MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes
 # so if AP blocks WPS often, consider to use this option to prevent blocking
 MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=15;
+# (1 or 0) if set to 1 means that additional airodump-ng (monitoring access point behavior) isn't started
+# set this to 0 if you wan't to see what's going on with AP (signal, beacons...etc)
+NO_AIRODUMP=1;
+# (1 or 0) if set to 1 means that additional aireplay-ng (doing fake-auth) isn't started
+# set this to 0 if you have encounter "[!] WARNING: Failed to associate with xx:xx:xx:xx:xx:xx (ESSID: yyyyy)"
+NO_AIREPLAY=1;
+
 # Delay in seconds between association requests (aireplay-ng fake auth -l option)
 FAKE_AUTH_DELAY_SECONDS=300;
 # sleep in seconds between checking different AP's (inner loop iteration)
@@ -76,7 +83,7 @@ WIRELESS_INTERFACE="wlan0";
 # which means that only rejecting PIN will be considered as activity.
 # Sometimes Reaver outputs only "Received M1" and won't go further, then you should change this to "Received M3". 
 # This value should depend on specific AP's behavior.
-REAVER_ACTIVITY_PERL_REGEXP="Received M3";
+REAVER_ACTIVITY_PERL_REGEXP="Received M\d+";
 
 
 ######################## END OF CONFIGURATION #######################################################
