@@ -307,7 +307,6 @@ isAPOnline(){
 	  echo "1";
 	  return;
       fi
-
   done
 }
 
