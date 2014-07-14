@@ -14,7 +14,7 @@
 # vv is Enabled by default below, because script relies on Reaver response
 # WARNING! You can't turn off -v or -vv flag, because script is analyzing Reaver output
 ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 -x 3";
-# since (2014-07-10)
+# since (2014-07-12)
 # minimum number of minutes between pin attempts per access point
 # this option ensures you that AP won't be checked more often than MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes
 # so if AP blocks WPS often, consider to use this option to prevent blocking
@@ -24,7 +24,7 @@ MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=15;
 NO_AIRODUMP=1;
 # (1 or 0) if set to 1 means that additional aireplay-ng (doing fake-auth) isn't started
 # set this to 0 if you have encounter "[!] WARNING: Failed to associate with xx:xx:xx:xx:xx:xx (ESSID: yyyyy)"
-NO_AIREPLAY=1;
+NO_AIREPLAY=0;
 
 # Delay in seconds between association requests (aireplay-ng fake auth -l option)
 FAKE_AUTH_DELAY_SECONDS=300;
@@ -33,7 +33,7 @@ FAKE_AUTH_DELAY_SECONDS=300;
 SLEEP_BETWEEN_APS=0;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=10;
+SLEEP_BEFORE_LIST_RECHECK=0;
 # Time in minutes during which AP is skipped inside loop because of reach "AP rate limit"
 # Notice: "...was blocked less than {LIMIT_WAIT_MINUTES} minutes ago, skipping"
 LIMIT_WAIT_MINUTES=15;
