@@ -141,10 +141,15 @@ touch $CHECK_ACTIVITY_FILE && chmod 600 $CHECK_ACTIVITY_FILE;
 #####################################################################################
 ##### FUNCTIONS #####################################################################
 #####################################################################################
+stopMonitor() {
+	  echoGreen "airmon-ng stop mon0" && airmon-ng stop mon0;
+	  echoGreen "airmon-ng stop $WIRELESS_INTERFACE" && airmon-ng stop $WIRELESS_INTERFACE;
+	  echoGreen "airmon-ng check kill" && airmon-ng check kill;
+}
 restartMonitor() {
-      echoGreen "airmon-ng stop mon0" && airmon-ng stop mon0;
-      echoGreen "airmon-ng stop $WIRELESS_INTERFACE" && airmon-ng stop $WIRELESS_INTERFACE;
-      echoGreen "airmon-ng check kill" && airmon-ng check kill;
+      if [[ -n "$(ifconfig | grep mon0)" ]]; then
+	  echo $(stopMonitor);
+      fi
       echoGreen "airmon-ng start $WIRELESS_INTERFACE" && airmon-ng start $WIRELESS_INTERFACE;
 }
 changeMacTo(){
@@ -263,6 +268,49 @@ echoGreen(){
 echoBlue(){
    echo "$(tput setaf 6)>>>>>> ${1}$(tput sgr0)";
 }
+
+# checks whether airodump-ng works and scans properly
+isAirodumpWorking(){
+  #local CHECK=$(iwlist wlan0 scan | grep "$1");
+  if [[ -z $(ifconfig | grep "mon0") ]]; then
+    restartMonitor &>/dev/null;
+  fi
+  local TMP_LOG="$TMP_DIR/isAirodumpWorking";
+  local AIRODUMP_CSV_LOG=$TMP_LOG"-01.csv";
+  local BEGIN_TIME=$(date +%s);
+  local TIMEOUT=15;
+  # clear old logs
+  rm $AIRODUMP_CSV_LOG &>/dev/null;
+  airodump-ng --output-format csv --write $TMP_LOG mon0 &>/dev/null &
+  local LAST_PID=$!;
+  local CHECK="";
+  while true; do  
+      # if we reached timeout we have to end with failure
+      # so AP is offline
+      if [[ $[$BEGIN_TIME+$TIMEOUT] < $[$(date +%s)] ]]; then
+	  kill $LAST_PID;
+	  rm $AIRODUMP_CSV_LOG &>/dev/null;
+	  echo "0";
+	  return;
+      fi
+      # re-check airodump-ng log after X seconds
+      sleep 2;
+      if [[ -f "$AIRODUMP_CSV_LOG" ]];then
+	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep -i -P '[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}');
+      else
+	 continue;
+      fi
+      # if CHECK isn't empty it means that we have some BSSIDs in log 
+      if [[ -n "$CHECK" ]]; then
+	  kill $LAST_PID;
+	  rm $AIRODUMP_CSV_LOG &>/dev/null;
+	  echo "1";
+	  return;
+      fi
+  done
+}
+
+
 # waits XX seconds for AP to show up in airodump-ng log
 # using: isAPOnline AA:BB:CC:DD:EE:FF 3
 # BSSID and CHANNEL are important parameters, because airodump doesn't need to output all networks into it's log
@@ -271,7 +319,7 @@ echoBlue(){
 isAPOnline(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
   if [[ -z $(ifconfig | grep "mon0") ]]; then
-    airmon-ng start $WIRELESS_INTERFACE &>/dev/null;
+    restartMonitor &>/dev/null;
   fi
   local BSSID=$1;
   local CHANNEL=$2;
@@ -279,8 +327,8 @@ isAPOnline(){
   local AIRODUMP_CSV_LOG=$TMP_LOG"-01.csv";
   local BEGIN_TIME=$(date +%s);
   # clear old logs
-  rm $AIRODUMP_CSV_LOG 2>/dev/null;
-  airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &> /dev/null &
+  rm $AIRODUMP_CSV_LOG &>/dev/null;
+  airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &>/dev/null &
   local LAST_PID=$!;
   local CHECK="";
   while true; do  
@@ -288,14 +336,14 @@ isAPOnline(){
       # so AP is offline
       if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
-	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "0";
 	  return;
       fi
       # re-check airodump-ng log after X seconds
       sleep 5;
       if [[ -f "$AIRODUMP_CSV_LOG" ]];then
-	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep "$BSSID");
+	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep $BSSID);
       else
 	 continue;
       fi
@@ -303,7 +351,7 @@ isAPOnline(){
       # so AP is online
       if [[ -n "$CHECK" ]]; then
 	  kill $LAST_PID;
-	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "1";
 	  return;
       fi
@@ -314,22 +362,22 @@ isAPOnline(){
 # 
 findAPChannel(){
   if [[ -z $(ifconfig | grep "mon0") ]]; then
-    airmon-ng start $WIRELESS_INTERFACE;
+    restartMonitor &>/dev/null;
   fi
   local BSSID=$1;
   local TMP_LOG="$TMP_DIR/findAPChannel";
   local AIRODUMP_CSV_LOG=$TMP_LOG"-01.csv";
   local BEGIN_TIME=$(date +%s);
    # clear old logs
-  rm $AIRODUMP_CSV_LOG 2>/dev/null;
-  nohup airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0 &> /dev/null &
+  rm $AIRODUMP_CSV_LOG &>/dev/null;
+  airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0 &>/dev/null &
   local LAST_PID=$!;
   local CHANNEL="";
   while true; do
       # if we reached timeout we have to end with failure
       if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
 	  kill $LAST_PID;
-	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "0";
 	  return;
       fi
@@ -347,7 +395,7 @@ findAPChannel(){
 	      continue;
           fi
 	  kill $LAST_PID;
-	  rm $AIRODUMP_CSV_LOG 2>/dev/null;
+	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo $CHANNEL;
 	  return;
       fi
@@ -371,22 +419,31 @@ IFS=$'\n';
 
 # make copy of your list, before proceed (just in case you need it)
 cp "$FILEPATH" "${FILEPATH}_backup";
-while true; do
 
+resetWifiCard;
+restartMonitor;
+
+
+while true; do
   # check if there is anything to attack in FILE and exit script if there is nothing
   if [[ -z "$(cat $FILEPATH | grep -i -P ^[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2})" ]]; then
     echoBlue "There is no target to attack in file $FILEPATH";
     exit;
   fi
-
   # get targets (list of pairs BSSID CHANNEL from file), below near done is file
   echoBlue "Start reading file: $FILEPATH";
   FILE=$(cat $FILEPATH);
-
- 
-  resetWifiCard;
-  restartMonitor;
-  #changeMacTo $MAC;
+  
+  echoBlue "Checking is airodump-ng working....";
+  if [[ $(isAirodumpWorking) != "1" ]]; then
+      echoBlue "PROBLEM DETECTED!!! airodump-ng seems not returning any output!!";
+      echoBlue "Trying to reset wifi driver... and monitor";
+      stopMonitor;
+      resetWifiCard;    
+      restartMonitor;
+  else
+      echoBlue "airodump-ng is working...";
+  fi
  
   for TARGET in $FILE; do
       echoBlue "--------------------------------------------------";
@@ -478,7 +535,7 @@ while true; do
 	      changeMacTo $SPOOFED_MAC;
       fi
 
-      ######## SCAN TO CHECK IF AP IS ONLINE #########
+      ######## CHECK IF AP IS ONLINE #########
       echoBlue "Wait $BSSID_ONLINE_TIMEOUT seconds... scanning if $BSSID ($ESSID) is online";
       # in case that channel is random we have to discover it (but it takes longer time since airodump-ng must hopping between channels)
       if [[ $CHANNEL == "R" ]]; then
