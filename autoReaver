@@ -270,6 +270,7 @@ echoBlue(){
 }
 
 # checks whether airodump-ng works and scans properly
+# uses globals: TMP_DIR
 isAirodumpWorking(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
   if [[ -z $(ifconfig | grep "mon0") ]]; then
@@ -316,6 +317,7 @@ isAirodumpWorking(){
 # BSSID and CHANNEL are important parameters, because airodump doesn't need to output all networks into it's log
 # and also it's much much faster to connect to known BSSID and CHANNEL (it doesn't need to jump between channels)
 # it gets timeout from global BSSID_ONLINE_TIMEOUT
+# uses globals: BSSID_ONLINE_TIMEOUT, TMP_DIR
 isAPOnline(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
   if [[ -z $(ifconfig | grep "mon0") ]]; then
@@ -358,8 +360,7 @@ isAPOnline(){
   done
 }
 
-# it gets timeout from globals: BSSID_ONLINE_TIMEOUT, TMP_DIR
-# 
+# uses globals: BSSID_ONLINE_TIMEOUT, TMP_DIR
 findAPChannel(){
   if [[ -z $(ifconfig | grep "mon0") ]]; then
     restartMonitor &>/dev/null;
@@ -434,16 +435,20 @@ while true; do
   echoBlue "Start reading file: $FILEPATH";
   FILE=$(cat $FILEPATH);
   
-  echoBlue "Checking is airodump-ng working....";
-  if [[ $(isAirodumpWorking) != "1" ]]; then
-      echoBlue "PROBLEM DETECTED!!! airodump-ng seems not returning any output!!";
-      echoBlue "Trying to reset wifi driver... and monitor";
-      stopMonitor;
-      resetWifiCard;    
-      restartMonitor;
-  else
-      echoBlue "airodump-ng is working...";
-  fi
+  while true; do
+      echoBlue "Checking is airodump-ng working....";
+      if [[ $(isAirodumpWorking) != "1" ]]; then
+	  echoBlue "PROBLEM DETECTED!!! airodump-ng seems not returning any output!!";
+	  echoBlue "Trying to reset wifi driver... and monitor";
+	  stopMonitor;
+	  resetWifiCard;    
+	  restartMonitor;
+	  sleep 10;
+      else
+	  echoBlue "airodump-ng is working...";
+	  break;
+      fi
+  done
  
   for TARGET in $FILE; do
       echoBlue "--------------------------------------------------";
