@@ -1,0 +1,9 @@
+#!/bin/bash
+IFS=$'\n';
+for LINE in $(cat apTargets.txt); do
+    SSID=$(echo $LINE | awk '{ print $3 }');
+    CHANNEL=$(echo $LINE | awk '{ print $2 }');
+    MAC=$(echo $LINE | awk '{ print $1 }' | sed s/#//);
+    echo "------------- $SSID ----------------------"
+    ./showPinDates $MAC --group-by-day
+done;
