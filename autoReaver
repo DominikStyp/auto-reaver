@@ -499,6 +499,9 @@ while true; do
       fi
 
       echoBlue "Checking: BSSID=$BSSID, CHANNEL=$CHANNEL, ESSID=$ESSID ";
+      if [[ -f $SESSIONFILE ]]; then
+	  echoBlue "I've found  "$(head -1 $SESSIONFILE)"  checked PINs in session file";
+      fi
 
       ######### CHECK IF AP WAS BLOCKED #######
       # if file indicating AP rate limit exists, and if it was modified less than LIMIT_WAIT_MINUTES minutes
@@ -523,9 +526,7 @@ while true; do
 	      echoBlue "Average time between PINs: $AVG_SECONDS seconds";
 	  fi
       fi
-      if [[ -f $SESSIONFILE ]]; then
-	  echoBlue "I found  "$(head -1 $SESSIONFILE)"  checked PINs in session file";
-      fi
+
 
 
       ######### CHANGE MAC IF SPOOFED ########
