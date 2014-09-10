@@ -26,7 +26,7 @@ MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=5;
 LIMIT_WAIT_MINUTES=15;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=300;
+SLEEP_BEFORE_LIST_RECHECK=10;
 # sleep in seconds between checking different AP's (inner loop iteration)
 # Notice: "Sleeping between AP's for {SLEEP_BETWEEN_APS}"
 SLEEP_BETWEEN_APS=0;
@@ -45,7 +45,7 @@ INACTIVITY_TIMEOUT=300;
 # set this to 0 if you wan't to see what's going on with AP (signal, beacons...etc)
 NO_AIRODUMP=1;
 # (1 or 0) if set to 1 means that additional aireplay-ng (doing fake-auth) isn't started
-# set this to 0 if you have encounter "[!] WARNING: Failed to associate with xx:xx:xx:xx:xx:xx (ESSID: yyyyy)"
+# set this to 0 if you encountered "[!] WARNING: Failed to associate with xx:xx:xx:xx:xx:xx (ESSID: yyyyy)"
 NO_AIREPLAY=0;
 
 

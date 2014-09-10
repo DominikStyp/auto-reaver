@@ -385,7 +385,7 @@ findAPChannel(){
       # re-check airodump-ng log after X seconds
       sleep 5;
       if [[ -f "$AIRODUMP_CSV_LOG" ]];then
-	 CHANNEL=$(cat $AIRODUMP_CSV_LOG | gawk -F', ' '{ if(/'$BSSID'/){ print gensub(/ +/,"","g", $4); } }');
+	 CHANNEL=$(cat $AIRODUMP_CSV_LOG | gawk -F', ' '{ if(/'$BSSID'/){ print gensub(/ +/,"","g", $4); } }' | gawk '{ print $1; }');
       else 
 	 continue;
       fi
