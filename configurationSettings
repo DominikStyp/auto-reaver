@@ -20,7 +20,7 @@ ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 --win7";
 # minimum number of minutes between pin attempts per access point
 # this option ensures you that AP won't be checked more often than MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes
 # so if AP blocks WPS often, consider to use this option to prevent blocking
-MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=5;
+MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=10;
 # Time in minutes during which AP is skipped inside loop because of reach "AP rate limit"
 # Notice: "...was blocked less than {LIMIT_WAIT_MINUTES} minutes ago, skipping"
 LIMIT_WAIT_MINUTES=15;
