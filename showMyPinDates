@@ -1,9 +1,15 @@
 #!/bin/bash
+source ./configurationSettings;
 IFS=$'\n';
 for LINE in $(cat apTargets.txt); do
     SSID=$(echo $LINE | awk '{ print $3 }');
     CHANNEL=$(echo $LINE | awk '{ print $2 }');
-    MAC=$(echo $LINE | awk '{ print $1 }' | sed s/#//);
-    echo "------------- $SSID ----------------------"
+    # sed -r s/-.*-// - in case that comment '-----PIN-WAS-FOUND---- is added
+    # sed s/#// - in case that line is preceded by comment sign
+    MAC=$(echo $LINE | awk '{ print $1 }' | sed s/#// | sed -r s/-.*-//);
+    BSSID_CLEAR=$(echo $MAC | sed s/://g | tr '[:lower:]' '[:upper:]');
+    SESSIONFILE=$REAVER_SESSION_DIR'/'$BSSID_CLEAR'.wpc';
+    ALL_PINS=$(head -1 $SESSIONFILE);
+    echo "------- $SSID (PINs checked: $ALL_PINS) ---------"
     ./showPinDates $MAC --group-by-day
 done;

