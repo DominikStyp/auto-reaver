@@ -295,7 +295,7 @@ isAirodumpWorking(){
 	  return;
       fi
       # re-check airodump-ng log after X seconds
-      sleep 2;
+      sleep 1;
       if [[ -f "$AIRODUMP_CSV_LOG" ]];then
 	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep -i -P '[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}');
       else
@@ -343,7 +343,7 @@ isAPOnline(){
 	  return;
       fi
       # re-check airodump-ng log after X seconds
-      sleep 5;
+      sleep 2;
       if [[ -f "$AIRODUMP_CSV_LOG" ]];then
 	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep $BSSID);
       else
@@ -491,7 +491,6 @@ while true; do
           echoBlue "I've included specific settings for '$ESSID' from file $(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";    
 	  source "$(pwd)/configurationSettingsPerAp/$BSSID_CLEAR";
       fi
-
       ########## SLEEP BETWEEN APS ###############
       if [[ $[$SLEEP_BETWEEN_APS] > 0 ]]; then
 	echoBlue "Sleeping between AP's for $SLEEP_BETWEEN_APS seconds....";

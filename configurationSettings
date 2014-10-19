@@ -15,23 +15,20 @@
 # vv is Enabled by default below, because script relies on Reaver response
 # --win7 = Mimic Windows 7 registrar
 # WARNING! You can't turn off -vv flag, because script is analyzing Reaver output
+
 ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 --win7";
 # since (2014-07-12)
 # minimum number of minutes between pin attempts per access point
 # this option ensures you that AP won't be checked more often than MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes
 # so if AP blocks WPS often, consider to use this option to prevent blocking
-MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=5;
+MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=1;
 # Time in minutes during which AP is skipped inside loop because of reach "AP rate limit"
 # Notice: "...was blocked less than {LIMIT_WAIT_MINUTES} minutes ago, skipping"
-LIMIT_WAIT_MINUTES=15;
+LIMIT_WAIT_MINUTES=30;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
 SLEEP_BEFORE_LIST_RECHECK=300;
-# sleep in seconds between checking different AP's (inner loop iteration)
-# Notice: "Sleeping between AP's for {SLEEP_BETWEEN_APS}"
-SLEEP_BETWEEN_APS=0;
-# Delay in seconds between association requests (aireplay-ng fake auth -l option)
-FAKE_AUTH_DELAY_SECONDS=300;
+
 # Timeout in seconds during script waits for AP to show up in airodump, after that AP is considered offline
 # Notice: "Wait {BSSID_ONLINE_TIMEOUT} seconds... scanning if XX:XX:XX:XX:XX:XX (XXXX) is online" 
 # Notice: "If you use random channels for AP's increase this value, since hopping between channels takes long time"
@@ -39,6 +36,11 @@ BSSID_ONLINE_TIMEOUT=30;
 # After this time of inactivity reaver will be killed, and started again with another AP.
 # Setting INACTIVITY_TIMEOUT=0 will prevent activityCheckerScript to run.
 INACTIVITY_TIMEOUT=300;
+# sleep in seconds between checking different AP's (inner loop iteration)
+# Notice: "Sleeping between AP's for {SLEEP_BETWEEN_APS}"
+SLEEP_BETWEEN_APS=0;
+# Delay in seconds between association requests (aireplay-ng fake auth -l option)
+FAKE_AUTH_DELAY_SECONDS=60;
 
 
 # (1 or 0) if set to 1 means that additional airodump-ng (monitoring access point behavior) isn't started
