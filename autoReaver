@@ -295,7 +295,7 @@ isAirodumpWorking(){
 	  return;
       fi
       # re-check airodump-ng log after X seconds
-      sleep 1;
+      sleep 2;
       if [[ -f "$AIRODUMP_CSV_LOG" ]];then
 	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep -i -P '[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}');
       else
