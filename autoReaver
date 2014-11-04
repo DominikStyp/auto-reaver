@@ -295,7 +295,7 @@ isAirodumpWorking(){
 	  return;
       fi
       # re-check airodump-ng log after X seconds
-      sleep 2;
+      sleep 4;
       if [[ -f "$AIRODUMP_CSV_LOG" ]];then
 	 CHECK=$(cat $AIRODUMP_CSV_LOG | grep -i -P '[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}:[a-f0-9]{2}');
       else
@@ -303,6 +303,7 @@ isAirodumpWorking(){
       fi
       # if CHECK isn't empty it means that we have some BSSIDs in log 
       if [[ -n "$CHECK" ]]; then
+	  #cp $AIRODUMP_CSV_LOG /root/__TEST
 	  kill $LAST_PID;
 	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "1";
