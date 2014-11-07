@@ -9,7 +9,14 @@ for LINE in $(cat apTargets.txt); do
     MAC=$(echo $LINE | awk '{ print $1 }' | sed s/#// | sed -r s/-.*-//);
     BSSID_CLEAR=$(echo $MAC | sed s/://g | tr '[:lower:]' '[:upper:]');
     SESSIONFILE=$REAVER_SESSION_DIR'/'$BSSID_CLEAR'.wpc';
-    ALL_PINS=$(head -1 $SESSIONFILE);
-    echo "------- $SSID (PINs checked: $ALL_PINS) ---------"
+    FIRST_PINS=$(sed '1!d' $SESSIONFILE);
+    SECOND_PINS=$(sed '2!d' $SESSIONFILE);
+    FIRST_PINS_LINE=$[ $FIRST_PINS + 3 ];
+    SECOND_PINS_LINE=$[ $SECOND_PINS + 10004 ];
+    LAST_FIRST_PIN=$(sed "$FIRST_PINS_LINE!d" $SESSIONFILE);
+    LAST_SECOND_PIN=$(sed "$SECOND_PINS_LINE!d" $SESSIONFILE);
+    ALL_PINS=$[ $FIRST_PINS+$SECOND_PINS ];
+    echo "------- $SSID (PINs checked: $ALL_PINS) ---------";
+    echo "------- LAST CHECKED PIN PARTS: $LAST_FIRST_PIN, $LAST_SECOND_PIN ---------";
     ./showPinDates $MAC --group-by-day
 done;

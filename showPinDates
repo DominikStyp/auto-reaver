@@ -16,6 +16,7 @@ fi
 F=$PIN_DATE_TMP_DIR"/"$(echo "$1" | sed s/://g);
 if [[ ! -f "$F" ]]; then
    echo "File $F doesn't exist";
+   exit;
 fi
 
 # ${@:2} - means arguments array from $2 element
