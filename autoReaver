@@ -215,6 +215,14 @@ getKonsolePidByProcessName(){
     ps aux | gawk '!/konsole/ || !/'"$1"'/{ next; } {print $2}';
 }
 
+getNotKonsoleProcessByName(){
+    ps aux | gawk '/konsole/ || !/'"$1"'/{ next; } {print $2}';
+}
+
+getPidByProcessName(){
+    ps aux | gawk '!/'"$1"'/{ next; } {print $2}';
+}
+
 getWifiCardDriver(){
     lshw -c network | gawk '!/wireless/ || !/driver/{ next; } { while(++i<=NF){ if($i ~ /driver\=/){ sub("driver=","",$i); print $i; } } }';
 }
@@ -282,8 +290,9 @@ isAirodumpWorking(){
   local TIMEOUT=15;
   # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  airodump-ng --output-format csv --write $TMP_LOG mon0 &>/dev/null &
-  local LAST_PID=$!;
+  CM="konsole --title 'airodump-ng' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG mon0' ";
+  eval $CM 2>/dev/null
+  local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHECK="";
   while true; do  
       # if we reached timeout we have to end with failure
@@ -331,8 +340,9 @@ isAPOnline(){
   local BEGIN_TIME=$(date +%s);
   # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0 &>/dev/null &
-  local LAST_PID=$!;
+  CM="konsole --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0' ";
+  eval $CM 2>/dev/null
+  local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHECK="";
   while true; do  
       # if we reached timeout we have to end with failure
@@ -372,8 +382,9 @@ findAPChannel(){
   local BEGIN_TIME=$(date +%s);
    # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0 &>/dev/null &
-  local LAST_PID=$!;
+  CM="konsole --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0' ";
+  eval $CM 2>/dev/null
+  local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHANNEL="";
   while true; do
       # if we reached timeout we have to end with failure

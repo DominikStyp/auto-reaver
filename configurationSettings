@@ -27,7 +27,7 @@ MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=1;
 LIMIT_WAIT_MINUTES=30;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=600;
+SLEEP_BEFORE_LIST_RECHECK=300;
 
 # Timeout in seconds during script waits for AP to show up in airodump, after that AP is considered offline
 # Notice: "Wait {BSSID_ONLINE_TIMEOUT} seconds... scanning if XX:XX:XX:XX:XX:XX (XXXX) is online" 
