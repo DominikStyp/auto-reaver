@@ -142,16 +142,14 @@ touch $CHECK_ACTIVITY_FILE && chmod 600 $CHECK_ACTIVITY_FILE;
 ##### FUNCTIONS #####################################################################
 #####################################################################################
 stopMonitor() {
-	  echoGreen "killall airodump-ng" && killall airodump-ng;
-	  echoGreen "killall aireplay-ng" && killall aireplay-ng;
+	  echoGreen "killall airodump-ng" && killall airodump-ng &>/dev/null;
+	  echoGreen "killall aireplay-ng" && killall aireplay-ng &>/dev/null;
 	  echoGreen "airmon-ng stop mon0" && airmon-ng stop mon0;
 	  echoGreen "airmon-ng stop $WIRELESS_INTERFACE" && airmon-ng stop $WIRELESS_INTERFACE;
 	  echoGreen "airmon-ng check kill" && airmon-ng check kill;
 }
 restartMonitor() {
-      if [[ -n "$(ifconfig | grep mon0)" ]]; then
-	  echo $(stopMonitor);
-      fi
+      stopMonitor;
       echoGreen "airmon-ng start $WIRELESS_INTERFACE" && airmon-ng start $WIRELESS_INTERFACE;
 }
 changeMacTo(){
