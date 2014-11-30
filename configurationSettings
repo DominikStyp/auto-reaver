@@ -24,10 +24,10 @@ ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 --win7";
 MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=1;
 # Time in minutes during which AP is skipped inside loop because of reach "AP rate limit"
 # Notice: "...was blocked less than {LIMIT_WAIT_MINUTES} minutes ago, skipping"
-LIMIT_WAIT_MINUTES=30;
+LIMIT_WAIT_MINUTES=60;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=1200;
+SLEEP_BEFORE_LIST_RECHECK=300;
 
 # Timeout in seconds during script waits for AP to show up in airodump, after that AP is considered offline
 # Notice: "Wait {BSSID_ONLINE_TIMEOUT} seconds... scanning if XX:XX:XX:XX:XX:XX (XXXX) is online" 

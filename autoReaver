@@ -544,7 +544,7 @@ while true; do
       # here we generate random mac address (containing only numbers 0-9)
       # first octets should be 02 as most Wireless Cards have
       if [[ -z "$SPOOFED_MAC" ]]; then
-	      MAC=$(perl -e 'sub l{":".int(rand(9)).int(rand(9));}; print "02".l.l.l.l.l;');
+	      MAC=$(perl -e 'sub c{if(rand(1)>0.5){chr(rand(6)+97);}else{int(rand(9))}};sub l{":".c.c;}; print "00".l.l.l.l.l;');
 	      changeMacTo $MAC;
       fi
       if [ ! -z "$SPOOFED_MAC" ] && [ "$MAC" != "$SPOOFED_MAC" ]; then
