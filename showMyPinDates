@@ -15,8 +15,8 @@ for LINE in $(cat apTargets.txt); do
     fi
     FIRST_PINS=$(sed '1!d' $SESSIONFILE);
     SECOND_PINS=$(sed '2!d' $SESSIONFILE);
-    FIRST_PINS_LINE=$[ $FIRST_PINS + 3 ];
-    SECOND_PINS_LINE=$[ $SECOND_PINS + 10004 ];
+    FIRST_PINS_LINE=$[ $FIRST_PINS + 4 ];
+    SECOND_PINS_LINE=$[ $SECOND_PINS + 10003 ];
     LAST_FIRST_PIN=$(sed "$FIRST_PINS_LINE!d" $SESSIONFILE);
     LAST_SECOND_PIN=$(sed "$SECOND_PINS_LINE!d" $SESSIONFILE);
     if [[ -z $FIRST_PINS || -z $SECOND_PINS ]]; then
