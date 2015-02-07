@@ -162,6 +162,8 @@ changeMacTo(){
 # unfortunately konsole doesn't work with eval -e $variableWithCode
 # so I had to put this into temporary script file
 makeActivityChecker() {
+# kill Activity Checker if one exists
+kill $(ps aux | grep 'Reaver Activity Checker' | gawk '{print $2; exit;}') 2>/dev/null;
 # escaped \$(date) because it has to be invoked during script run, not before :)
 local TMP_SCRIPT=$(cat  <<EOF
 echo "Reaver will be killed after $INACTIVITY_TIMEOUT seconds of inactivity ";
