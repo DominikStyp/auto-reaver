@@ -174,7 +174,7 @@ echo "This should prevent reaver from stuck on one AP instead of checking others
 echo "Hit CTRL+C to stop";
 TIMEOUT=$INACTIVITY_TIMEOUT;
 while true; do
-    sleep 30;
+    sleep 10;
     if [[ -z \$(ps x | grep -v grep | grep reaver) ]]; then
       echo \$(date)": No reaver process found....skipping";
       continue;
@@ -187,9 +187,9 @@ while true; do
     NOW=\$(date +%s);
     CURRENT_INACTIVITY=\$[\$NOW-\$LASTMOD];
     echo \$(date)": Reaver inactivity...\$CURRENT_INACTIVITY/\$TIMEOUT seconds";
-    if [[ \$[\$NOW] > \$[\$LASTMOD+\$TIMEOUT] ]]; then
+    if [[ \$[\$NOW] >= \$[\$LASTMOD+\$TIMEOUT] ]]; then
 	killall -INT reaver;
-	echo "Reaver killed...";
+	echo "Reaver was killed...";
     fi
 done
 EOF
