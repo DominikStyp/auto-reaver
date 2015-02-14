@@ -187,7 +187,7 @@ while true; do
     NOW=\$(date +%s);
     CURRENT_INACTIVITY=\$[\$NOW-\$LASTMOD];
     echo \$(date)": Reaver inactivity...\$CURRENT_INACTIVITY/\$TIMEOUT seconds";
-    if [[ \$[\$NOW] >= \$[\$LASTMOD+\$TIMEOUT] ]]; then
+    if [[ \$[\$NOW] > \$[\$LASTMOD+\$TIMEOUT] ]]; then
 	killall -INT reaver;
 	echo "Reaver was killed...";
     fi
