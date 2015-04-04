@@ -199,7 +199,7 @@ while true; do
 done
 EOF
 );
-konsole --title 'Reaver Activity Checker' -e /bin/sh -c "$TMP_SCRIPT" 2>/dev/null;
+konsole --background-mode --title 'Reaver Activity Checker' -e /bin/sh -c "$TMP_SCRIPT" 2>/dev/null;
 }
 
 isProcessActive() {
@@ -297,7 +297,7 @@ isAirodumpWorking(){
   local TIMEOUT=15;
   # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  CM="konsole --title 'airodump-ng' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG mon0' ";
+  CM="konsole --background-mode --title 'airodump-ng' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG mon0' ";
   eval $CM 2>/dev/null
   local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHECK="";
@@ -347,7 +347,7 @@ isAPOnline(){
   local BEGIN_TIME=$(date +%s);
   # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  CM="konsole --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0' ";
+  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0' ";
   eval $CM 2>/dev/null
   local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHECK="";
@@ -393,7 +393,7 @@ findAPChannel(){
   local BEGIN_TIME=$(date +%s);
    # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  CM="konsole --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0' ";
+  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0' ";
   eval $CM 2>/dev/null
   local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHANNEL="";
@@ -627,12 +627,12 @@ while true; do
       ############# START KONSOLE COMMANDS WITH: REAVER && R.A.C. && AIREPLAY && AIRODUMP
       if [[ $NO_AIRODUMP == 0 ]]; then
 	  # start monitoring BSSID & show blocked WPS in other konsole windows
-	  CM="konsole --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --bssid=$BSSID --channel=$CHANNEL mon0' ";
+	  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --bssid=$BSSID --channel=$CHANNEL mon0' ";
 	  echoGreen "$CM" && eval $CM 2>/dev/null
       fi
       if [[ $NO_AIREPLAY == 0 ]]; then
 	  # sending fake auth every X sec to keep alive connection and better performance of reaver
-	  CM="konsole --title 'Fake authorization aireplay-ng' -e /bin/sh -c 'aireplay-ng -1 $FAKE_AUTH_DELAY_SECONDS -a $BSSID -c $BSSID mon0' ";
+	  CM="konsole --background-mode --title 'Fake authorization aireplay-ng' -e /bin/sh -c 'aireplay-ng -1 $FAKE_AUTH_DELAY_SECONDS -a $BSSID -c $BSSID mon0' ";
 	  echoGreen "$CM" && eval $CM 2>/dev/null
       fi
       # there are only 3 attempts from 1 MAC
