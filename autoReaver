@@ -401,7 +401,7 @@ findAPChannel(){
       # if we reached timeout we have to end with failure
       if [[ $[$BEGIN_TIME+$BSSID_ONLINE_TIMEOUT] < $[$(date +%s)] ]]; then
 	  if [[ ! -z $LAST_PID ]]; then
-	    kill $LAST_PID;
+	    kill $LAST_PID &>/dev/null;
 	  fi;
 	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "0";
