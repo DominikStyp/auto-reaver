@@ -305,7 +305,7 @@ isAirodumpWorking(){
       # if we reached timeout we have to end with failure
       # so AP is offline
       if [[ $[$BEGIN_TIME+$TIMEOUT] < $[$(date +%s)] ]]; then
-	  kill $LAST_PID;
+	  kill $LAST_PID &>/dev/null;
 	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "0";
 	  return;
@@ -320,7 +320,7 @@ isAirodumpWorking(){
       # if CHECK isn't empty it means that we have some BSSIDs in log 
       if [[ -n "$CHECK" ]]; then
 	  #cp $AIRODUMP_CSV_LOG /root/__TEST
-	  kill $LAST_PID;
+	  kill $LAST_PID &>/dev/null;
 	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "1";
 	  return;
@@ -373,7 +373,7 @@ isAPOnline(){
       # so AP is online
       if [[ -n "$CHECK" ]]; then
 	  if [[ ! -z $LAST_PID ]]; then
-	    kill $LAST_PID;
+	    kill $LAST_PID &>/dev/null;
 	  fi;
 	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo "1";
@@ -420,7 +420,7 @@ findAPChannel(){
           if [[ $CHANNEL -gt 14 ]]; then
 	      continue;
           fi
-	  kill $LAST_PID;
+	  kill $LAST_PID &>/dev/null;
 	  rm $AIRODUMP_CSV_LOG &>/dev/null;
 	  echo $CHANNEL;
 	  return;
