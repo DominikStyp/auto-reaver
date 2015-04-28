@@ -101,4 +101,8 @@ WIRELESS_INTERFACE="wlan0";
 # This value should depend on specific AP's behavior.
 REAVER_ACTIVITY_PERL_REGEXP="Received M3";
 
+# Here you can define your own regexp which if matched - means that one PIN has been checked and written to log file
+# Logs are stored in PIN_DATE_TMP_DIR directory
+REAVER_CHECKED_PIN_PERL_REGEXP="Received WSC NACK"
+
 ######################## END OF CONFIGURATION #######################################################
