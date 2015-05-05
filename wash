@@ -1,1 +1,21 @@
-wash -i mon0 -C -s
+#!/bin/bash
+
+# Here we have a Perl script that invokes grep in a background, 
+# Program checks every outputted mac - if it's inside excluded list ./myExcludedList.txt
+# wash output is previously splitted to fragments by Perl split funtion (using space as a separator), 
+# first part of splitted string is a MAC address of every AP,
+# grep command invoked by Perl that uses backticks looks like: grep "00:11:22:33:44:55" ./myExcludedList.txt 2>/dev/null
+
+if [[ ! -z "$1" ]]; then
+  wash -i mon0 -C -s  | perl -lane '{ if(length($_)>17) { @x=split " ", $_; $mac=$x[0]; $res=`grep "$mac" '$1' 2>/dev/null`; if(length($res)>17){  } else{ print $_; } }   }'
+else
+  echo 'Note that you can make a file containing access points that you want to EXCLUDE from wash search,'
+  echo '(format must be the same as apTargets.txt list)'
+  echo 'You can type: '$0' [PATH_TO_EXCLUDED_APs_FILE]'
+  echo 'Example: '$0' ./myExcludedList.txt'
+  echo '---------------------------------------------'
+  wash -i mon0 -C -s
+fi
+
+
+
