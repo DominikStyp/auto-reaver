@@ -55,6 +55,15 @@ Check if any APs were detected
 If there are targets in *myAPTargets* file, you can proceed attack, with following command:  
 ` ./autoReaver myAPTargets `  
 
+
+# If using raw Backtrack 5
+If you're using Backtrack 5 without any upgrades, with **airodump-ng version 1.0** try to switch to **airodump1.0** branch and **pull request**. <br />
+Further updates on **master** will be suited to **Airodump-ng 1.2 rc2**
+```
+$ git checkout airodump1.0
+$ git pull
+```
+
 #ADDITIONAL FEATURES
   * Script logs dates of PIN attempts, so you can check *how often AP is locked* and for how long. Default directory for those logs is *ReaverLastPinDates*.
   * Script logs each *AP rate limit* for every AP (default directory is */tmp/APLimitBSSID*), so you can easily check when last *rate limit* occured
