@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# WARNING! In case you use old Airodump-ng 1.0 (instead of 1.2)
+# And you haven't updated it from http://manpages.ubuntu.com/manpages/trusty/man8/airodump-ng-oui-update.8.html
+# You should use "mon0" as a monitor name
+MONITOR_NAME="wlan0mon";
+
 ############ AUTO-REAVER CONFIGURATION #######################################
 #### Additional Reaver options besides bssid, spoofed mac, session file, channel
 # d [seconds] = delay (seconds) between PIN attempts

