@@ -21,7 +21,7 @@ MONITOR_NAME="wlan0mon";
 # --win7 = Mimic Windows 7 registrar
 # WARNING! You can't turn off -vv flag, because script is analyzing Reaver output
 
-ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 20 -d 0 --win7";
+ADDITIONAL_OPTIONS="-g 1 -E -S -N -T 1 -t 30 -d 0 --win7";
 # since (2014-07-12)
 # minimum number of minutes between pin attempts per access point
 # this option ensures you that AP won't be checked more often than MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS minutes
@@ -32,7 +32,15 @@ MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=1;
 LIMIT_WAIT_MINUTES=15;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=60;
+SLEEP_BEFORE_LIST_RECHECK=30;
+
+
+# TODO ============================================================================
+# TODO if 1 script shows average time between PINS, if it's 0 this won't be calculated
+SHOW_AVERAGE_TIME_BETWEEN_PINS=1;
+
+
+
 
 # Timeout in seconds during script waits for AP to show up in airodump, after that AP is considered offline
 # Notice: "Wait {BSSID_ONLINE_TIMEOUT} seconds... scanning if XX:XX:XX:XX:XX:XX (XXXX) is online" 
