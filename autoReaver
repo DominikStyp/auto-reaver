@@ -302,6 +302,7 @@ getLastPinDate(){
     echo $(tail -1 $F | awk '{print strftime("%Y-%m-%d %H:%M:%S",$1)}');
 }
 # counts average number of seconds between pin dates (every line represents pin date)
+# first argument has to be file containing dates in unix timestamp format
 countAVGSecondsBetweenDates(){
     local F=$1;
     if [[ ! -f "$F" || -z "$F" ]]; then
@@ -633,7 +634,7 @@ while true; do
       fi
 
       ######## SHOW AVERAGE TIME BETWEEN PINS AND CHECK PINS NUM
-      if [[ -f $BSSID_LAST_PIN_DATE_FILE ]]; then
+      if [[ $SHOW_AVERAGE_TIME_BETWEEN_PINS == 1 && -f $BSSID_LAST_PIN_DATE_FILE ]]; then
 	  AVG_SECONDS=$(countAVGSecondsBetweenDates $BSSID_LAST_PIN_DATE_FILE);
 	  if [[ ! -z $AVG_SECONDS ]]; then
 	      echoBlue "Average time between PINs: $AVG_SECONDS seconds";
