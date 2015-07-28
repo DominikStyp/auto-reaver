@@ -5,8 +5,8 @@ if [[ -z "$1" ]]; then
    echo "Usage: $0 [PATH_TO_BACKUP_FILE] [SESSION_FILE_NAME]"
    echo "[SESSION_FILE_NAME] EXAMPLE:    AABBCCDDEEFF.wpc"
    echo "[PATH_TO_BACKUP_FILE] EXAMPLE:  ./reaverBackup/reaverBackup_YYYY-MM-DD_HH-MM-SS.tar.gz"
-   echo "REMEMBER! Reaver session file is taken from ./configurationSettings file (REAVER_SESSION_DIR)."
-   echo "So you have to have correct settings there."
+   echo "REMEMBER! Reaver session directory is taken from ./configurationSettings file (REAVER_SESSION_DIR)."
+   echo "So you have to have correct settings there, before running this script check your configurationSettings."
    exit
 fi
 BACKUP_F=$1
