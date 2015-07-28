@@ -32,7 +32,7 @@ MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=1;
 LIMIT_WAIT_MINUTES=15;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=10;
+SLEEP_BEFORE_LIST_RECHECK=120;
 
 # if 1 script shows average time between PINS, if it's 0 this won't be calculated
 SHOW_AVERAGE_TIME_BETWEEN_PINS=0;
