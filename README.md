@@ -216,6 +216,17 @@ Options available:
 *--group-by-day* - Grouping PIN dates, by day and shows PIN count of each day  
 *--group-by-hour* - Grouping PIN hours, by day+hour and shows PIN count of each day+hour  
 
+###restoreSessionFileFromTarGZBackup.sh
+Bash script that is used to restore choosed session file from the **.tar.gz** file, assuming that you have backups of reaver session directory.<br />
+To restore from the backup you have to use following command: <br />
+```shell
+./restoreSessionFileFromTarGZBackup.sh [PATH_TO_BACKUP_FILE] [SESSION_FILE_NAME]
+# example - assuming that you are in auto-reaver directory and have certain backup
+./restoreSessionFileFromTarGZBackup.sh ./reaverBackup/reaverBackup_2015-07-25_00-00-01.tar.gz 7054D28E0A44.wpc
+```
+[SESSION_FILE_NAME]   EXAMPLE:   **AABBCCDDEEFF.wpc** <br />
+[PATH_TO_BACKUP_FILE] EXAMPLE:  **./reaverBackup/reaverBackup_YYYY-MM-DD_HH-MM-SS.tar.gz** <br />
+
 ###shuffleReaverSession.pl
 PERL script to shuffle PINs in reaver session file.  
 This way you can increase probability of finding correct PIN earlier than using regular pin checking. Usage:  
