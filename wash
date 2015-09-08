@@ -11,15 +11,20 @@ getMonitorName(){
     ifconfig | perl -lane '{ if(/^[^\s]*mon/){ $_ =~ s/\s+.*//; print $_; } }'
 }
 
-if [[ ! -z "$1" ]]; then
+if [[ "$1" == "NO_EXCLUDED" ]]; then
+  echo "No excluded list provided, searching all access points."
+  wash -i $(getMonitorName) -C -s
+elif [[ ! -z "$1" && -f "$1" ]]; then
+  echo "Excluded list provided, searching access points without those in file: $1"
   wash -i $(getMonitorName) -C -s  | perl -lane '{ if(length($_)>17) { @x=split " ", $_; $mac=$x[0]; $res=`grep "$mac" '$1' 2>/dev/null`; if(length($res)>17){  } else{ print $_; } }   }'
 else
-  echo 'Note that you can make a file containing access points that you want to EXCLUDE from wash search,'
+  echo 'You can use a file containing access points list that you want to EXCLUDE from wash search,'
   echo '(format must be the same as apTargets.txt list)'
-  echo 'You can type: '$0' [PATH_TO_EXCLUDED_APs_FILE]'
+  echo 'You can then type: '$0' [PATH_TO_EXCLUDED_APs_FILE]'
   echo 'Example: '$0' ./myExcludedList.txt'
   echo '---------------------------------------------'
-  wash -i mon0 -C -s
+  echo "If you don't want to use excluded ap's list, just type:"
+  echo "$0 NO_EXCLUDED"
 fi
 
 
