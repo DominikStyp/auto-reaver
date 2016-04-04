@@ -69,6 +69,16 @@
 #    sudo iwlist wlan0 scan
 #    wash -i ${MONITOR_NAME} -C -s
 
+# echo green text
+echoGreen(){
+   echo "$(tput setaf 2)>>>>>> ${1}$(tput sgr0)";
+}
+# echo blue text
+echoBlue(){
+   echo "$(tput setaf 6)>>>>>> ${1}$(tput sgr0)";
+}
+
+
 if [[ ! -f $(pwd)"/configurationSettings" ]]; then
     echo "OOOOOPS! You've lost configuration file of AutoReaver: ./configurationSettings";
     echo "Try to recover this file, or download default version from project site, and try again";
@@ -319,14 +329,7 @@ countAVGSecondsBetweenDates(){
 				 
 }
 
-# echo green text
-echoGreen(){
-   echo "$(tput setaf 2)>>>>>> ${1}$(tput sgr0)";
-}
-# echo blue text
-echoBlue(){
-   echo "$(tput setaf 6)>>>>>> ${1}$(tput sgr0)";
-}
+
 
 # checks whether airodump-ng works and scans properly
 # uses globals: TMP_DIR

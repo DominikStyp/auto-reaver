@@ -7,16 +7,41 @@
 # grep command invoked by Perl that uses backticks looks like: grep "00:11:22:33:44:55" ./myExcludedList.txt 2>/dev/null
 
 # tries to extract monitor name from the ifconfig output
+WIRELESS_INTERFACE="wlan0";
+
 getMonitorName(){
     ifconfig | perl -lane '{ if(/^[^\s]*mon/){ $_ =~ s/\s+.*//; print $_; } }'
 }
+startMonitor(){
+      echoGreen "airmon-ng start $WIRELESS_INTERFACE" && airmon-ng start $WIRELESS_INTERFACE
+}
+
+# echo green text
+echoGreen(){
+   echo "$(tput setaf 2)>>>>>> ${1}$(tput sgr0)";
+}
+# echo blue text
+echoBlue(){
+   echo "$(tput setaf 6)>>>>>> ${1}$(tput sgr0)";
+}
+
+MONITOR_NAME=$(getMonitorName);
+if [[ -z "$MONITOR_NAME" ]]; then
+   startMonitor;
+   MONITOR_NAME=$(getMonitorName);
+fi
+if [[ -z "$MONITOR_NAME" ]]; then
+  echoBlue "ERROR - can't find monitor";
+  exit;
+fi
+
 
 if [[ "$1" == "NO_EXCLUDED" ]]; then
   echo "No excluded list provided, searching all access points."
-  wash -i $(getMonitorName) -C -s
+  wash -i $MONITOR_NAME -C -s
 elif [[ ! -z "$1" && -f "$1" ]]; then
   echo "Excluded list provided, searching access points without those in file: $1"
-  wash -i $(getMonitorName) -C -s  | perl -lane '{ if(length($_)>17) { @x=split " ", $_; $mac=$x[0]; $res=`grep "$mac" '$1' 2>/dev/null`; if(length($res)>17){  } else{ print $_; } }   }'
+  wash -i $MONITOR_NAME -C -s  | perl -lane '{ if(length($_)>17) { @x=split " ", $_; $mac=$x[0]; $res=`grep "$mac" '$1' 2>/dev/null`; if(length($res)>17){  } else{ print $_; } }   }'
 else
   echo 'You can use a file containing access points list that you want to EXCLUDE from wash search,'
   echo '(format must be the same as apTargets.txt list)'

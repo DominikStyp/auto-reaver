@@ -32,7 +32,7 @@ MINUTES_WAIT_BETWEEN_PIN_ATTEMPTS=1;
 LIMIT_WAIT_MINUTES=15;
 # sleep in seconds before another re-check of whole list (outer loop iteration)
 # Notice: "Sleeping before another list re-check for {SLEEP_BEFORE_LIST_RECHECK} seconds"
-SLEEP_BEFORE_LIST_RECHECK=60;
+SLEEP_BEFORE_LIST_RECHECK=5;
 
 # if 1 script shows average time between PINS, if it's 0 this won't be calculated
 SHOW_AVERAGE_TIME_BETWEEN_PINS=0;
@@ -40,7 +40,7 @@ SHOW_AVERAGE_TIME_BETWEEN_PINS=0;
 # Timeout in seconds during script waits for AP to show up in airodump, after that AP is considered offline
 # Notice: "Wait {BSSID_ONLINE_TIMEOUT} seconds... scanning if XX:XX:XX:XX:XX:XX (XXXX) is online" 
 # Notice: "If you use random channels for AP's increase this value, since hopping between channels takes long time"
-BSSID_ONLINE_TIMEOUT=60;
+BSSID_ONLINE_TIMEOUT=30;
 # After this time of inactivity reaver will be killed, and started again with another AP.
 # Setting INACTIVITY_TIMEOUT=0 will prevent activityCheckerScript to run.
 INACTIVITY_TIMEOUT=120;
