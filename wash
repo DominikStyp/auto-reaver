@@ -42,12 +42,30 @@ echoGreen(){
 echoBlue(){
    echo "$(tput setaf 6)>>>>>> ${1}$(tput sgr0)";
 }
+getWifiCardDriver(){
+    lshw -c network | gawk '!/wireless/ || !/driver/{ next; } { while(++i<=NF){ if($i ~ /driver\=/){ sub("driver=","",$i); print $i; } } }';
+}
+resetWifiCard(){
+  local WIFI_DRIVER=$(getWifiCardDriver);
+  local RESET_CARD_DRIVER_CMD="";
+  if [[ -z "$WIFI_DRIVER" ]]; then
+	echoBlue "Sorry couldn't get your WifiDriver";
+	echoBlue "Check if any wifi card is connected and try again";
+	echoBlue "You may try to reconnect your wifi card to USB port, and try again.";
+	echoBlue "If above solutions doesn't work, you have to check getWifiCardDriver() function on your own...";
+	exit;
+  else 
+	echoBlue "I found that your WIFI driver is $WIFI_DRIVER ";
+	echoBlue "Resetting WIFI card ";
+	echoGreen "modprobe -r $WIFI_DRIVER && modprobe $WIFI_DRIVER";
+	modprobe -r $WIFI_DRIVER && modprobe $WIFI_DRIVER;
+  fi
+}
+
+resetWifiCard;
+startMonitor;
 
 MONITOR_NAME=$(getMonitorName);
-if [[ -z "$MONITOR_NAME" ]]; then
-   startMonitor;
-   MONITOR_NAME=$(getMonitorName);
-fi
 if [[ -z "$MONITOR_NAME" ]]; then
    restartMonitor;
    MONITOR_NAME=$(getMonitorName);
