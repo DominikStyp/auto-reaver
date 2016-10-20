@@ -1,1 +1,7 @@
-sudo iwlist wlan0 scan
+#!/bin/bash
+
+getMonitorName(){
+    ifconfig | perl -lane '{ if(/^[^\s]*mon/){ $_ =~ s/\s+.*//; print $_; } }'
+}
+MONITOR_NAME=$(getMonitorName);
+sudo iwlist $MONITOR_NAME scan;
