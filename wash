@@ -15,6 +15,24 @@ getMonitorName(){
 startMonitor(){
       echoGreen "airmon-ng start $WIRELESS_INTERFACE" && airmon-ng start $WIRELESS_INTERFACE
 }
+stopMonitor() {
+	  echoGreen "killall airodump-ng" && killall airodump-ng &>/dev/null;
+	  echoGreen "killall aireplay-ng" && killall aireplay-ng &>/dev/null;
+	  # if monitor was empty tries to get it
+	  if [[ -z "$MONITOR_NAME" ]]; then
+	      MONITOR_NAME=$(getMonitorName);
+	  fi
+	  # if monitor is still empty there's no need to stop it
+	  if [[ ! -z "$MONITOR_NAME" ]]; then
+	      echoGreen "airmon-ng stop $MONITOR_NAME" && airmon-ng stop $MONITOR_NAME;
+	      echoGreen "airmon-ng stop $WIRELESS_INTERFACE" && airmon-ng stop $WIRELESS_INTERFACE;
+	      echoGreen "airmon-ng check" && airmon-ng check;
+	  fi
+}
+restartMonitor() {
+      stopMonitor;
+      startMonitor;
+}
 
 # echo green text
 echoGreen(){
@@ -28,6 +46,10 @@ echoBlue(){
 MONITOR_NAME=$(getMonitorName);
 if [[ -z "$MONITOR_NAME" ]]; then
    startMonitor;
+   MONITOR_NAME=$(getMonitorName);
+fi
+if [[ -z "$MONITOR_NAME" ]]; then
+   restartMonitor;
    MONITOR_NAME=$(getMonitorName);
 fi
 if [[ -z "$MONITOR_NAME" ]]; then
