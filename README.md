@@ -34,6 +34,7 @@ And then following steps are being processed:
     * Airmon-ng, Airodump-ng, Aireplay-ng
     * Wash (WPS Service Scanner)
     * Perl
+    *lshw
     
 #USAGE EXAMPLE
 First you have to download lastest version  
